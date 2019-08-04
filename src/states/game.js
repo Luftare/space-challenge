@@ -1,21 +1,27 @@
 import Phaser from 'phaser';
 
-const PLAYER_VELOCITY = 120;
+const PLAYER_VELOCITY = 100;
 const PLAYER_JUMP_VELOCITY = 300;
 
 let player;
 let playerDirection = -1;
+let playerFailed = false;
+let playerSpawnPoint;
 let platforms;
 let turnToggleInputPressed = false;
 let input;
 
 const tiles = [
-  [300, 500],
-  [350, 500],
-  [400, 500],
-  [500, 400],
-  [550, 400],
-  [600, 400],
+  [300, 100],
+  [350, 120],
+  [400, 100],
+  [500, 240],
+  [550, 240],
+  [600, 240],
+  [450, 0],
+  [500, 0],
+  [550, 0],
+  [600, 0],
 ];
 
 export default class GameScene extends Phaser.Scene {
@@ -33,16 +39,23 @@ export default class GameScene extends Phaser.Scene {
   }
 
   create() {
-    player = this.physics.add.sprite(700, 500, 'player').setSize(16, 48);
+    playerSpawnPoint = {
+      x: this.game.scale.width - 50,
+      y: this.game.scale.height - 50,
+    };
+
+    player = this.physics.add.sprite(0, 0, 'player').setSize(16, 48);
     player.setBounce(0.0);
-    player.setCollideWorldBounds(true);
+    player.setCollideWorldBounds(false);
+
+    this.respawn();
 
     platforms = this.physics.add.staticGroup();
 
     tiles.forEach(([x, y]) => {
       platforms
-        .create(x, y, 'ground')
-        .setScale(0.1, 0.1)
+        .create(x, this.game.scale.height - y, 'ground')
+        .setScale(0.12, 0.12)
         .refreshBody();
     });
 
@@ -52,7 +65,11 @@ export default class GameScene extends Phaser.Scene {
   }
 
   update() {
-    this.handleInput();
+    if (!playerFailed) {
+      this.handleInput();
+      this.handleFailing();
+    }
+    window.player = player;
   }
 
   handleInput() {
@@ -84,5 +101,21 @@ export default class GameScene extends Phaser.Scene {
     } else {
       player.setVelocityX(0);
     }
+  }
+
+  handleFailing() {
+    const didFail = player.body.bottom >= this.game.scale.height;
+
+    if (didFail) {
+      playerFailed = true;
+      setTimeout(this.respawn, 500);
+    }
+  }
+
+  respawn() {
+    playerFailed = false;
+    player.setPosition(playerSpawnPoint.x, playerSpawnPoint.y, 0, 0);
+    player.setVelocity(0, 0);
+    playerDirection = -1;
   }
 }

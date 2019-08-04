@@ -10,7 +10,14 @@ export default class BootScene extends Phaser.Scene {
     });
     this.load.image('ground', require('../assets/ground.jpg'));
 
-    const rect = new Phaser.Geom.Rectangle(200, 285, 400, 30);
+    const { width, height } = this.game.scale;
+    const rect = new Phaser.Geom.Rectangle(
+      width * 0.2,
+      height * 0.45,
+      width * 0.6,
+      height * 0.1
+    );
+
     const gfx = this.add.graphics();
     this.load.on('progress', progress => {
       gfx
