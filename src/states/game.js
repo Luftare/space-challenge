@@ -5,8 +5,18 @@ const PLAYER_JUMP_VELOCITY = 300;
 
 let player;
 let playerDirection = -1;
+let platforms;
 let turnToggleInputPressed = false;
 let input;
+
+const tiles = [
+  [300, 500],
+  [350, 500],
+  [400, 500],
+  [500, 400],
+  [550, 400],
+  [600, 400],
+];
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -26,6 +36,17 @@ export default class GameScene extends Phaser.Scene {
     player = this.physics.add.sprite(700, 500, 'player').setSize(16, 48);
     player.setBounce(0.0);
     player.setCollideWorldBounds(true);
+
+    platforms = this.physics.add.staticGroup();
+
+    tiles.forEach(([x, y]) => {
+      platforms
+        .create(x, y, 'ground')
+        .setScale(0.1, 0.1)
+        .refreshBody();
+    });
+
+    this.physics.add.collider(player, platforms);
 
     input = this.input.keyboard.createCursorKeys();
   }
