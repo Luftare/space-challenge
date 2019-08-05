@@ -3,8 +3,8 @@ import Phaser from 'phaser';
 const GRAVITY = 300;
 const PLAYER_VELOCITY = 100;
 const PLAYER_JUMP_VELOCITY = 300;
-const PLAYER_ROCKET_ACCELERATION_X = 150;
-const PLAYER_ROCKET_ACCELERATION_Y = 550;
+const PLAYER_ROCKET_ACCELERATION_X = 200;
+const PLAYER_ROCKET_ACCELERATION_Y = 600;
 const MAX_PLAYER_FUEL = 50;
 
 let player;
@@ -13,6 +13,7 @@ let playerFailed = false;
 let playerFuel = 0;
 let playerRocketing = false;
 let playerSpawnPoint = { x: 0, y: 0 };
+let playerFlashTween;
 let rocketEmitter;
 let platforms;
 let turnToggleInputPressed = false;
@@ -71,6 +72,17 @@ export default class GameScene extends Phaser.Scene {
     player = this.physics.add.sprite(0, 0, 'player').setSize(16, 48);
     player.setBounce(0.0);
     player.setCollideWorldBounds(false);
+
+    playerFlashTween = this.tweens.add({
+      targets: player,
+      alpha: 0,
+      duration: 200,
+      repeat: 2,
+      onComplete: () => {
+        player.alpha = 1;
+      },
+    });
+
     this.respawn();
 
     platforms = this.physics.add.staticGroup();
@@ -221,5 +233,6 @@ export default class GameScene extends Phaser.Scene {
     playerDirection = -1;
     playerFuel = 0;
     playerRocketing = false;
+    playerFlashTween.restart();
   }
 }
