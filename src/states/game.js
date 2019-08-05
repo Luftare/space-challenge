@@ -73,6 +73,23 @@ export default class GameScene extends Phaser.Scene {
       y: height - GRID_SIZE * 1.5 - BOTTOM_MARGIN,
     };
 
+    this.add.sprite(width * 0.5, height * 0.5, 'background');
+
+    rocketEmitter = this.add.particles('smoke').createEmitter({
+      x: 0,
+      y: 23,
+      speedY: { min: 250, max: 450 },
+      speedX: { min: -50, max: 50 },
+      rotate: { min: 0, max: 360 },
+      gravityY: 0,
+      scale: 0.1,
+      quantity: 1,
+      lifespan: { min: 150, max: 300 },
+    });
+
+    rocketEmitter.setAlpha(0.5, 1, 300);
+    rocketEmitter.stop();
+
     player = this.physics.add.sprite(0, 0, 'player').setSize(16, 48);
     player.setBounce(0.0);
     player.setCollideWorldBounds(false);
@@ -146,20 +163,6 @@ export default class GameScene extends Phaser.Scene {
 
     input = this.input.keyboard.createCursorKeys();
 
-    rocketEmitter = this.add.particles('smoke').createEmitter({
-      x: 0,
-      y: 23,
-      speedY: { min: 250, max: 450 },
-      speedX: { min: -50, max: 50 },
-      rotate: { min: 0, max: 360 },
-      gravityY: 0,
-      scale: 0.1,
-      quantity: 1,
-      lifespan: { min: 150, max: 300 },
-    });
-
-    rocketEmitter.setAlpha(0.5, 1, 300);
-    rocketEmitter.stop();
     rocketEmitter.startFollow(player);
   }
 
