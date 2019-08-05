@@ -5,8 +5,8 @@ export default class BootScene extends Phaser.Scene {
 
   preload() {
     this.load.spritesheet('player', require('../assets/player.png'), {
-      frameWidth: 32,
-      frameHeight: 48,
+      frameWidth: 40,
+      frameHeight: 55,
     });
     this.load.image('ground', require('../assets/ground.jpg'));
 
@@ -33,20 +33,20 @@ export default class BootScene extends Phaser.Scene {
     this.anims.create({
       key: 'player-walk-left',
       frames: this.anims.generateFrameNumbers('player', { start: 0, end: 3 }),
-      frameRate: 10,
+      frameRate: 7,
       repeat: -1,
     });
 
-    this.anims.create({
-      key: 'player-idle',
-      frames: [{ key: 'player', frame: 4 }],
-      frameRate: 20,
-    });
+    // this.anims.create({
+    //   key: 'player-idle',
+    //   frames: [{ key: 'player', frame: 4 }],
+    //   frameRate: 20,
+    // });
 
     this.anims.create({
       key: 'player-walk-right',
-      frames: this.anims.generateFrameNumbers('player', { start: 5, end: 8 }),
-      frameRate: 10,
+      frames: this.anims.generateFrameNumbers('player', { start: 4, end: 7 }),
+      frameRate: 7,
       repeat: -1,
     });
 

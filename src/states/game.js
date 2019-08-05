@@ -1,12 +1,18 @@
 import Phaser from 'phaser';
 
+const GRAVITY = 300;
 const PLAYER_VELOCITY = 100;
 const PLAYER_JUMP_VELOCITY = 300;
+const PLAYER_ROCKET_ACCELERATION_X = 120;
+const PLAYER_ROCKET_ACCELERATION_Y = 400;
+const MAX_PLAYER_FUEL = 100;
 
 let player;
 let playerDirection = -1;
 let playerFailed = false;
-let playerSpawnPoint;
+let playerFuel = 0;
+let playerRocketing = false;
+let playerSpawnPoint = { x: 0, y: 0 };
 let platforms;
 let turnToggleInputPressed = false;
 let input;
@@ -19,7 +25,11 @@ function requestPlayerJump(player) {
 
   if (blocked.down && !blocked.up) {
     player.setVelocityY(-PLAYER_JUMP_VELOCITY);
+    playerFuel = MAX_PLAYER_FUEL;
+    return true;
   }
+
+  return false;
 }
 
 const tiles = [
@@ -42,7 +52,7 @@ export default class GameScene extends Phaser.Scene {
       physics: {
         default: 'arcade',
         arcade: {
-          gravity: { y: 300 },
+          gravity: { y: GRAVITY },
           debug: false,
         },
       },
@@ -92,7 +102,15 @@ export default class GameScene extends Phaser.Scene {
     });
 
     rightButton.setInteractive().on('pointerdown', () => {
-      requestPlayerJump(player);
+      const didJump = requestPlayerJump(player);
+
+      if (!didJump) {
+        playerRocketing = true;
+      }
+    });
+
+    rightButton.setInteractive().on('pointerup', () => {
+      playerRocketing = false;
     });
 
     this.physics.add.collider(player, platforms);
@@ -124,6 +142,16 @@ export default class GameScene extends Phaser.Scene {
       requestPlayerJump(player);
     }
 
+    if (playerRocketing && playerFuel > 0) {
+      player.body.acceleration.set(
+        PLAYER_ROCKET_ACCELERATION_X * playerDirection,
+        -PLAYER_ROCKET_ACCELERATION_Y
+      );
+      playerFuel--;
+    } else {
+      player.body.acceleration.set(0, 0);
+    }
+
     if (playerDirection === -1 && !blocked.left) {
       if (blocked.down) {
         player.setVelocityX(-PLAYER_VELOCITY);
@@ -153,5 +181,7 @@ export default class GameScene extends Phaser.Scene {
     player.setPosition(playerSpawnPoint.x, playerSpawnPoint.y, 0, 0);
     player.setVelocity(0, 0);
     playerDirection = -1;
+    playerFuel = 0;
+    playerRocketing = false;
   }
 }
