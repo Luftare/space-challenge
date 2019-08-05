@@ -23,6 +23,11 @@ const gameConfig = {
 
 function newGame() {
   if (game) return;
+
+  if (mobile) {
+    const screenAspectRatio = window.innerWidth / window.innerHeight;
+    gameConfig.scale.height = gameConfig.scale.width / screenAspectRatio;
+  }
   game = new Phaser.Game(gameConfig);
 }
 
@@ -39,9 +44,6 @@ const handleResize = () => {
   }
 
   if (!game && !landscapeOrientation) {
-    const screenAspectRatio = window.innerWidth / window.innerHeight;
-    gameConfig.scale.height = gameConfig.scale.width / screenAspectRatio;
-
     newGame();
   }
 };
