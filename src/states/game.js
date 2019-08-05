@@ -28,7 +28,7 @@ function requestPlayerJump(player) {
 
   if (blocked.down && !blocked.up) {
     player.setVelocityY(-PLAYER_JUMP_VELOCITY);
-    playerFuel = MAX_PLAYER_FUEL;
+    // playerFuel = MAX_PLAYER_FUEL;
     return true;
   }
 
@@ -168,8 +168,8 @@ export default class GameScene extends Phaser.Scene {
       this.handleInput();
       this.handleFailing();
     }
-    window.player = player;
-    window.emitter = rocketEmitter;
+    this.updateMovement();
+    this.updateAnimations();
   }
 
   handleInput() {
@@ -201,6 +201,14 @@ export default class GameScene extends Phaser.Scene {
       player.body.acceleration.set(0, 0);
     }
 
+    if (blocked.down) {
+      playerFuel = MAX_PLAYER_FUEL;
+    }
+  }
+
+  updateMovement() {
+    const blocked = player.body.blocked;
+
     if (playerDirection === -1 && !blocked.left) {
       if (blocked.down) {
         player.setVelocityX(-PLAYER_VELOCITY);
@@ -210,6 +218,10 @@ export default class GameScene extends Phaser.Scene {
         player.setVelocityX(PLAYER_VELOCITY);
       }
     }
+  }
+
+  updateAnimations() {
+    const blocked = player.body.blocked;
 
     if (blocked.down) {
       player.play(
