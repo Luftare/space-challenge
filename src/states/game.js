@@ -6,6 +6,8 @@ const PLAYER_JUMP_VELOCITY = 300;
 const PLAYER_ROCKET_ACCELERATION_X = 200;
 const PLAYER_ROCKET_ACCELERATION_Y = 600;
 const MAX_PLAYER_FUEL = 50;
+const BOTTOM_MARGIN = 120;
+const GRID_SIZE = 60;
 
 let player;
 let playerDirection = -1;
@@ -20,7 +22,6 @@ let turnToggleInputPressed = false;
 let input;
 let leftButton;
 let rightButton;
-const bottomMargin = 120;
 
 function requestPlayerJump(player) {
   const blocked = player.body.blocked;
@@ -34,17 +35,20 @@ function requestPlayerJump(player) {
   return false;
 }
 
+const _ = null;
+
 const tiles = [
-  [300, 100],
-  [350, 120],
-  [400, 100],
-  [500, 240],
-  [550, 240],
-  [600, 240],
-  [450, 0],
-  [500, 0],
-  [550, 0],
-  [600, 0],
+  [_, _, _, _, _, _, _, _, 5, _],
+  [_, _, _, _, _, _, _, _, _, _],
+  [_, 0, 3, 6, _, _, _, _, _, _],
+  [_, _, _, _, _, _, _, _, _, _],
+  [_, _, _, _, _, _, _, _, _, _],
+  [_, _, _, _, _, _, 3, 2, 1, _],
+  [_, _, _, _, _, _, _, _, _, _],
+  [_, _, _, _, _, _, _, _, _, _],
+  [_, 1, 0, 4, _, _, _, _, _, _],
+  [_, _, _, _, _, _, _, _, _, _],
+  [_, _, _, _, _, _, 3, 0, 2, 1],
 ];
 
 export default class GameScene extends Phaser.Scene {
@@ -65,8 +69,8 @@ export default class GameScene extends Phaser.Scene {
     const { width, height } = this.game.scale;
 
     playerSpawnPoint = {
-      x: width - 16,
-      y: height - 100 - bottomMargin,
+      x: width - 25,
+      y: height - GRID_SIZE * 1.5 - BOTTOM_MARGIN,
     };
 
     player = this.physics.add.sprite(0, 0, 'player').setSize(16, 48);
@@ -87,11 +91,18 @@ export default class GameScene extends Phaser.Scene {
 
     platforms = this.physics.add.staticGroup();
 
-    tiles.forEach(([x, y]) => {
-      platforms
-        .create(x, height - y - bottomMargin, 'ground')
-        .setScale(0.12, 0.12)
-        .refreshBody();
+    tiles.reverse().forEach((row, gridY) => {
+      row.forEach((value, gridX) => {
+        if (value === null) return;
+        platforms
+          .create(
+            (gridX + 0.5) * GRID_SIZE,
+            height - (gridY + 0.5) * GRID_SIZE - BOTTOM_MARGIN,
+            'tiles',
+            value
+          )
+          .refreshBody();
+      });
     });
 
     const buttonStyle = {
@@ -100,12 +111,17 @@ export default class GameScene extends Phaser.Scene {
       valign: 'center',
       halign: 'center',
       fixedWidth: width * 0.5,
-      fixedHeight: bottomMargin,
+      fixedHeight: BOTTOM_MARGIN,
       align: 'center',
     };
 
-    leftButton = this.add.text(0, height - bottomMargin, 'käänny', buttonStyle);
-    rightButton = this.add.text(width * 0.5, height - bottomMargin, 'hyppää', {
+    leftButton = this.add.text(
+      0,
+      height - BOTTOM_MARGIN,
+      'käänny',
+      buttonStyle
+    );
+    rightButton = this.add.text(width * 0.5, height - BOTTOM_MARGIN, 'hyppää', {
       ...buttonStyle,
       backgroundColor: 'red',
     });

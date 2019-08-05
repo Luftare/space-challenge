@@ -10,6 +10,10 @@ export default class BootScene extends Phaser.Scene {
     });
     this.load.image('ground', require('../assets/ground.jpg'));
     this.load.image('smoke', require('../assets/smoke.png'));
+    this.load.spritesheet('tiles', require('../assets/tiles.png'), {
+      frameWidth: 60,
+      frameHeight: 60,
+    });
 
     const { width, height } = this.game.scale;
     const rect = new Phaser.Geom.Rectangle(
