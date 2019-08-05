@@ -10,6 +10,17 @@ let playerSpawnPoint;
 let platforms;
 let turnToggleInputPressed = false;
 let input;
+let leftButton;
+let rightButton;
+const bottomMargin = 80;
+
+function requestPlayerJump(player) {
+  const blocked = player.body.blocked;
+
+  if (blocked.down && !blocked.up) {
+    player.setVelocityY(-PLAYER_JUMP_VELOCITY);
+  }
+}
 
 const tiles = [
   [300, 100],
@@ -39,24 +50,49 @@ export default class GameScene extends Phaser.Scene {
   }
 
   create() {
+    const { width, height } = this.game.scale;
+
     playerSpawnPoint = {
-      x: this.game.scale.width - 50,
-      y: this.game.scale.height - 50,
+      x: width - 16,
+      y: height - 100 - bottomMargin,
     };
 
     player = this.physics.add.sprite(0, 0, 'player').setSize(16, 48);
     player.setBounce(0.0);
     player.setCollideWorldBounds(false);
-
     this.respawn();
 
     platforms = this.physics.add.staticGroup();
 
     tiles.forEach(([x, y]) => {
       platforms
-        .create(x, this.game.scale.height - y, 'ground')
+        .create(x, height - y - bottomMargin, 'ground')
         .setScale(0.12, 0.12)
         .refreshBody();
+    });
+
+    const buttonStyle = {
+      fontSize: '24px',
+      backgroundColor: 'green',
+      valign: 'center',
+      halign: 'center',
+      fixedWidth: width * 0.5,
+      fixedHeight: bottomMargin,
+      align: 'center',
+    };
+
+    leftButton = this.add.text(0, height - bottomMargin, 'käänny', buttonStyle);
+    rightButton = this.add.text(width * 0.5, height - bottomMargin, 'hyppää', {
+      ...buttonStyle,
+      backgroundColor: 'red',
+    });
+
+    leftButton.setInteractive().on('pointerdown', () => {
+      playerDirection *= -1;
+    });
+
+    rightButton.setInteractive().on('pointerdown', () => {
+      requestPlayerJump(player);
     });
 
     this.physics.add.collider(player, platforms);
@@ -84,8 +120,8 @@ export default class GameScene extends Phaser.Scene {
       turnToggleInputPressed = false;
     }
 
-    if (input.up.isDown && blocked.down && !blocked.up) {
-      player.setVelocityY(-PLAYER_JUMP_VELOCITY);
+    if (input.up.isDown) {
+      requestPlayerJump(player);
     }
 
     if (playerDirection === -1 && !blocked.left) {
