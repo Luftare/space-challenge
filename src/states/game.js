@@ -3,9 +3,9 @@ import Phaser from 'phaser';
 const GRAVITY = 300;
 const PLAYER_VELOCITY = 100;
 const PLAYER_JUMP_VELOCITY = 300;
-const PLAYER_ROCKET_ACCELERATION_X = 120;
-const PLAYER_ROCKET_ACCELERATION_Y = 400;
-const MAX_PLAYER_FUEL = 100;
+const PLAYER_ROCKET_ACCELERATION_X = 150;
+const PLAYER_ROCKET_ACCELERATION_Y = 550;
+const MAX_PLAYER_FUEL = 50;
 
 let player;
 let playerDirection = -1;
@@ -13,12 +13,13 @@ let playerFailed = false;
 let playerFuel = 0;
 let playerRocketing = false;
 let playerSpawnPoint = { x: 0, y: 0 };
+let rocketEmitter;
 let platforms;
 let turnToggleInputPressed = false;
 let input;
 let leftButton;
 let rightButton;
-const bottomMargin = 80;
+const bottomMargin = 120;
 
 function requestPlayerJump(player) {
   const blocked = player.body.blocked;
@@ -116,6 +117,22 @@ export default class GameScene extends Phaser.Scene {
     this.physics.add.collider(player, platforms);
 
     input = this.input.keyboard.createCursorKeys();
+
+    rocketEmitter = this.add.particles('smoke').createEmitter({
+      x: 0,
+      y: 23,
+      speedY: { min: 250, max: 450 },
+      speedX: { min: -50, max: 50 },
+      rotate: { min: 0, max: 360 },
+      gravityY: 0,
+      scale: 0.1,
+      quantity: 1,
+      lifespan: { min: 150, max: 300 },
+    });
+
+    rocketEmitter.setAlpha(0.5, 1, 300);
+    rocketEmitter.stop();
+    rocketEmitter.startFollow(player);
   }
 
   update() {
@@ -124,6 +141,7 @@ export default class GameScene extends Phaser.Scene {
       this.handleFailing();
     }
     window.player = player;
+    window.emitter = rocketEmitter;
   }
 
   handleInput() {
@@ -148,7 +166,10 @@ export default class GameScene extends Phaser.Scene {
         -PLAYER_ROCKET_ACCELERATION_Y
       );
       playerFuel--;
+      rocketEmitter.start();
+      rocketEmitter.setSpeedX(-playerDirection * 50);
     } else {
+      rocketEmitter.stop();
       player.body.acceleration.set(0, 0);
     }
 
@@ -156,14 +177,31 @@ export default class GameScene extends Phaser.Scene {
       if (blocked.down) {
         player.setVelocityX(-PLAYER_VELOCITY);
       }
-      player.play('player-walk-left', true);
     } else if (playerDirection === 1 && !blocked.right) {
       if (blocked.down) {
         player.setVelocityX(PLAYER_VELOCITY);
       }
-      player.play('player-walk-right', true);
+    }
+
+    if (blocked.down) {
+      player.play(
+        playerDirection === 1 ? 'player-walk-right' : 'player-walk-left',
+        true
+      );
     } else {
-      player.setVelocityX(0);
+      if (!playerRocketing) {
+        player.play(
+          playerDirection === 1 ? 'player-flying-right' : 'player-flying-left',
+          true
+        );
+      } else {
+        player.play(
+          playerDirection === 1
+            ? 'player-rocketing-right'
+            : 'player-rocketing-left',
+          true
+        );
+      }
     }
   }
 

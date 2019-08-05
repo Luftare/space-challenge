@@ -9,6 +9,7 @@ export default class BootScene extends Phaser.Scene {
       frameHeight: 55,
     });
     this.load.image('ground', require('../assets/ground.jpg'));
+    this.load.image('smoke', require('../assets/smoke.png'));
 
     const { width, height } = this.game.scale;
     const rect = new Phaser.Geom.Rectangle(
@@ -32,21 +33,39 @@ export default class BootScene extends Phaser.Scene {
   create() {
     this.anims.create({
       key: 'player-walk-left',
-      frames: this.anims.generateFrameNumbers('player', { start: 0, end: 3 }),
-      frameRate: 7,
+      frames: this.anims.generateFrameNumbers('player', { start: 0, end: 7 }),
+      frameRate: 10,
       repeat: -1,
     });
 
-    // this.anims.create({
-    //   key: 'player-idle',
-    //   frames: [{ key: 'player', frame: 4 }],
-    //   frameRate: 20,
-    // });
+    this.anims.create({
+      key: 'player-flying-left',
+      frames: [{ key: 'player', frame: 2 }],
+      frameRate: 20,
+    });
+
+    this.anims.create({
+      key: 'player-flying-right',
+      frames: [{ key: 'player', frame: 10 }],
+      frameRate: 20,
+    });
+
+    this.anims.create({
+      key: 'player-rocketing-left',
+      frames: [{ key: 'player', frame: 16 }],
+      frameRate: 20,
+    });
+
+    this.anims.create({
+      key: 'player-rocketing-right',
+      frames: [{ key: 'player', frame: 17 }],
+      frameRate: 20,
+    });
 
     this.anims.create({
       key: 'player-walk-right',
-      frames: this.anims.generateFrameNumbers('player', { start: 4, end: 7 }),
-      frameRate: 7,
+      frames: this.anims.generateFrameNumbers('player', { start: 8, end: 15 }),
+      frameRate: 10,
       repeat: -1,
     });
 
