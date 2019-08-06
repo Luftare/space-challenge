@@ -1,4 +1,4 @@
-const _ = null;
+import { S, E, _ } from './obstacleMap';
 
 const tiles = [
   [_, _, _, _, _, _, _, _, 5, _],
@@ -11,14 +11,12 @@ const tiles = [
   [_, _, _, _, _, _, _, _, _, _],
   [_, _, _, _, _, _, 7, 2, 1, 8],
   [_, _, _, _, _, _, _, _, _, _],
-  [_, _, _, _, _, _, _, _, _, _],
+  [_, _, _, E, _, _, _, _, _, _],
   [_, 1, 0, 4, _, _, _, _, _, _],
-  [_, _, _, _, _, _, _, _, _, _],
+  [_, _, _, _, _, _, _, _, S, _],
   [_, _, _, _, _, _, 3, 0, 2, 1],
 ].reverse();
 
-const spawnPoint = { x: 8, y: 1 };
-
 const startDirection = -1;
 
-export default { startDirection, spawnPoint, tiles };
+export default { startDirection, tiles };

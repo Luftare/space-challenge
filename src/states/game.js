@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import level from '../levels/level-0';
+import * as obstacleMap from '../levels/obstacleMap';
 
 const GRAVITY = 300;
 const PLAYER_VELOCITY = 100;
@@ -55,11 +56,6 @@ export default class GameScene extends Phaser.Scene {
   create() {
     const { width, height } = this.game.scale;
 
-    playerSpawnPoint = {
-      x: (level.spawnPoint.x + 0.5) * GRID_SIZE,
-      y: height - (level.spawnPoint.y + 0.5) * GRID_SIZE - BOTTOM_MARGIN,
-    };
-
     background = this.add.tileSprite(
       0,
       -height * 2,
@@ -111,13 +107,24 @@ export default class GameScene extends Phaser.Scene {
       },
     });
 
-    this.respawn();
-
     platforms = this.physics.add.staticGroup();
 
     level.tiles.forEach((row, gridY) => {
       row.forEach((value, gridX) => {
-        if (value === null) return;
+        if (value === obstacleMap._) return; //empty space
+        if (value === obstacleMap.E) {
+          //end
+          return;
+        }
+        if (value === obstacleMap.S) {
+          //spawnpoint
+          playerSpawnPoint = {
+            x: (gridX + 0.5) * GRID_SIZE,
+            y: height - (gridY + 0.5) * GRID_SIZE - BOTTOM_MARGIN,
+          };
+          return;
+        }
+        //tile variations
         platforms
           .create(
             (gridX + 0.5) * GRID_SIZE,
@@ -128,6 +135,8 @@ export default class GameScene extends Phaser.Scene {
           .refreshBody();
       });
     });
+
+    this.respawn();
 
     const buttonStyle = {
       fontSize: '24px',
@@ -181,6 +190,7 @@ export default class GameScene extends Phaser.Scene {
       this.handleInput();
       this.handleFailing();
     }
+
     this.updateMovement();
     this.updateAnimations();
   }
