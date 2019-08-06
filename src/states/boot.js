@@ -8,6 +8,14 @@ export default class BootScene extends Phaser.Scene {
       frameWidth: 40,
       frameHeight: 55,
     });
+    this.load.spritesheet('rocket', require('../assets/rocket.png'), {
+      frameWidth: 60,
+      frameHeight: 60,
+    });
+    this.load.spritesheet('tiles', require('../assets/tiles.png'), {
+      frameWidth: 60,
+      frameHeight: 60,
+    });
     this.load.image('background', require('../assets/background.png'));
     this.load.image(
       'jump-rocket-button',
@@ -19,10 +27,6 @@ export default class BootScene extends Phaser.Scene {
     );
     this.load.image('smoke', require('../assets/smoke.png'));
     this.load.image('fire', require('../assets/fire.png'));
-    this.load.spritesheet('tiles', require('../assets/tiles.png'), {
-      frameWidth: 60,
-      frameHeight: 60,
-    });
 
     const { width, height } = this.game.scale;
     const rect = new Phaser.Geom.Rectangle(

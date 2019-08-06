@@ -16,9 +16,12 @@ let playerDirection = 1;
 let playerFailed = false;
 let playerFuel = 0;
 let playerRocketing = false;
+let playerFinished = false;
 let playerSpawnPoint = { x: 0, y: 0 };
 let playerFlashTween;
+let playerShrinkTween;
 let playerSpawning = false;
+let rocket;
 let rocketSmokeEmitter;
 let rocketFireEmitter;
 let background;
@@ -92,27 +95,18 @@ export default class GameScene extends Phaser.Scene {
     rocketSmokeEmitter.stop();
     rocketFireEmitter.stop();
 
-    player = this.physics.add.sprite(0, 0, 'player').setSize(30, 50);
-    player.setBounce(0.0);
-    player.setCollideWorldBounds(false);
-
-    playerFlashTween = this.tweens.add({
-      targets: player,
-      alpha: 0,
-      duration: 200,
-      repeat: 3,
-      onComplete: () => {
-        playerSpawning = false;
-        player.alpha = 1;
-      },
-    });
-
     platforms = this.physics.add.staticGroup();
 
     level.tiles.forEach((row, gridY) => {
       row.forEach((value, gridX) => {
         if (value === obstacleMap._) return; //empty space
         if (value === obstacleMap.E) {
+          rocket = this.physics.add.sprite(
+            (gridX + 0.5) * GRID_SIZE,
+            height - (gridY + 0.5) * GRID_SIZE - BOTTOM_MARGIN,
+            'rocket',
+            0
+          );
           //end
           return;
         }
@@ -134,6 +128,21 @@ export default class GameScene extends Phaser.Scene {
           )
           .refreshBody();
       });
+    });
+
+    player = this.physics.add.sprite(0, 0, 'player').setSize(30, 50);
+    player.setBounce(0.0);
+    player.setCollideWorldBounds(false);
+
+    playerFlashTween = this.tweens.add({
+      targets: player,
+      alpha: 0,
+      duration: 200,
+      repeat: 3,
+      onComplete: () => {
+        playerSpawning = false;
+        player.alpha = 1;
+      },
     });
 
     this.respawn();
@@ -176,6 +185,27 @@ export default class GameScene extends Phaser.Scene {
     });
 
     this.physics.add.collider(player, platforms);
+    rocket.body.setSize(40, 60);
+    rocket.body.allowGravity = false;
+    this.physics.add.overlap(player, rocket, () => {
+      if (player.body.blocked.down) {
+        if (!playerFinished) {
+          playerFinished = true;
+          this.tweens.add({
+            targets: player,
+            x: rocket.body.center.x,
+            scale: 0,
+            duration: 300,
+            repeat: 0,
+            onComplete: () => {
+              setTimeout(() => {
+                this.respawn();
+              }, 3000);
+            },
+          });
+        }
+      }
+    });
 
     input = this.input.keyboard.createCursorKeys();
 
@@ -196,6 +226,8 @@ export default class GameScene extends Phaser.Scene {
   }
 
   updateCamera() {
+    if (playerFinished) return;
+
     const playerGameY =
       player.body.bottom + GRID_SIZE * 3 - this.game.scale.height;
 
@@ -248,6 +280,11 @@ export default class GameScene extends Phaser.Scene {
   updateMovement() {
     const blocked = player.body.blocked;
 
+    if (playerFinished) {
+      player.setVelocity(0, 0);
+      return;
+    }
+
     if (playerSpawning) {
       player.setVelocityX(0);
       return;
@@ -266,6 +303,14 @@ export default class GameScene extends Phaser.Scene {
 
   updateAnimations() {
     const blocked = player.body.blocked;
+
+    if (playerFinished) {
+      player.play(
+        playerDirection === 1 ? 'player-stand-right' : 'player-stand-left',
+        true
+      );
+      return;
+    }
 
     if (playerSpawning) {
       player.play(
@@ -308,6 +353,8 @@ export default class GameScene extends Phaser.Scene {
 
   respawn() {
     playerFailed = false;
+    player.setScale(1, 1);
+    playerFinished = false;
     player.setPosition(playerSpawnPoint.x, playerSpawnPoint.y, 0, 0);
     player.setVelocity(0, 0);
     playerDirection = level.startDirection;
