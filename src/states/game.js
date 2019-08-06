@@ -20,6 +20,7 @@ let playerFlashTween;
 let playerSpawning = false;
 let rocketSmokeEmitter;
 let rocketFireEmitter;
+let background;
 let platforms;
 let turnToggleInputPressed = false;
 let input;
@@ -59,7 +60,13 @@ export default class GameScene extends Phaser.Scene {
       y: height - (level.spawnPoint.y + 0.5) * GRID_SIZE - BOTTOM_MARGIN,
     };
 
-    this.add.tileSprite(0, -1000, 2000, 4000, 'background');
+    background = this.add.tileSprite(
+      0,
+      -height * 2,
+      width * 2,
+      height * 8,
+      'background'
+    );
 
     rocketSmokeEmitter = this.add.particles('smoke').createEmitter({
       x: { min: -10, max: 10 },
@@ -132,22 +139,23 @@ export default class GameScene extends Phaser.Scene {
       align: 'center',
     };
 
-    leftButton = this.add.text(
-      0,
-      height - BOTTOM_MARGIN,
-      'käänny',
-      buttonStyle
-    );
-    rightButton = this.add.text(width * 0.5, height - BOTTOM_MARGIN, 'hyppää', {
-      ...buttonStyle,
-      backgroundColor: 'red',
-    });
+    leftButton = this.add
+      .text(0, height - BOTTOM_MARGIN, 'käänny', buttonStyle)
+      .setScrollFactor(0);
+    rightButton = this.add
+      .text(width * 0.5, height - BOTTOM_MARGIN, 'hyppää', {
+        ...buttonStyle,
+        backgroundColor: 'red',
+      })
+      .setScrollFactor(0);
 
     leftButton.setInteractive().on('pointerdown', () => {
+      if (playerSpawning) return;
       playerDirection *= -1;
     });
 
     rightButton.setInteractive().on('pointerdown', () => {
+      if (playerSpawning) return;
       const didJump = requestPlayerJump(player);
 
       if (!didJump) {
@@ -168,12 +176,27 @@ export default class GameScene extends Phaser.Scene {
   }
 
   update() {
+    this.updateCamera();
+
     if (!playerFailed) {
       this.handleInput();
       this.handleFailing();
     }
     this.updateMovement();
     this.updateAnimations();
+  }
+
+  updateCamera() {
+    const playerGameY =
+      player.body.bottom + GRID_SIZE * 3 - this.game.scale.height;
+
+    if (playerGameY < 0) {
+      this.cameras.main.setScroll(
+        0,
+        playerGameY + this.game.scale.height * 0.2
+      );
+      background.setPosition(0, playerGameY * 0.5);
+    }
   }
 
   handleInput() {
