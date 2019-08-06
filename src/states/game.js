@@ -62,30 +62,30 @@ export default class GameScene extends Phaser.Scene {
     this.add.tileSprite(0, -1000, 2000, 4000, 'background');
 
     rocketSmokeEmitter = this.add.particles('smoke').createEmitter({
-      x: 0,
-      y: 23,
-      speedY: { min: 250, max: 450 },
+      x: { min: -10, max: 10 },
+      y: { min: 20, max: 70 },
+      speedY: { min: 50, max: 150 },
       speedX: { min: -50, max: 50 },
       rotate: { min: 0, max: 360 },
+      scale: { start: 0.2, end: 0.7 },
       gravityY: 0,
-      scale: 0.1,
       quantity: 1,
-      lifespan: { min: 150, max: 300 },
+      lifespan: { min: 250, max: 800 },
     });
 
     rocketFireEmitter = this.add.particles('fire').createEmitter({
-      x: 0,
+      x: { min: -5, max: 5 },
       y: 20,
-      speedY: { min: 250, max: 350 },
+      speedY: { min: 100, max: 180 },
       speedX: { min: -50, max: 50 },
       rotate: { min: 0, max: 360 },
       gravityY: 0,
-      scale: 0.05,
+      scale: { start: 0.5, end: 0.1 },
       quantity: 1,
-      lifespan: { min: 20, max: 60 },
+      lifespan: { min: 320, max: 560 },
+      blendMode: 'ADD',
     });
 
-    rocketSmokeEmitter.setAlpha(0.5, 1, 300);
     rocketSmokeEmitter.stop();
     rocketFireEmitter.stop();
 
@@ -108,7 +108,7 @@ export default class GameScene extends Phaser.Scene {
 
     platforms = this.physics.add.staticGroup();
 
-    level.tiles.reverse().forEach((row, gridY) => {
+    level.tiles.forEach((row, gridY) => {
       row.forEach((value, gridX) => {
         if (value === null) return;
         platforms
