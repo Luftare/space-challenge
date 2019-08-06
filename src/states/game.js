@@ -7,7 +7,7 @@ const PLAYER_JUMP_VELOCITY = 300;
 const PLAYER_ROCKET_ACCELERATION_X = 200;
 const PLAYER_ROCKET_ACCELERATION_Y = 600;
 const MAX_PLAYER_FUEL = 50;
-const BOTTOM_MARGIN = 120;
+const BOTTOM_MARGIN = 150;
 const GRID_SIZE = 60;
 
 let player;
@@ -140,13 +140,12 @@ export default class GameScene extends Phaser.Scene {
     };
 
     leftButton = this.add
-      .text(0, height - BOTTOM_MARGIN, 'käänny', buttonStyle)
+      .sprite(0, height - BOTTOM_MARGIN, 'toggle-direction-button')
+      .setOrigin(0, 0)
       .setScrollFactor(0);
     rightButton = this.add
-      .text(width * 0.5, height - BOTTOM_MARGIN, 'hyppää', {
-        ...buttonStyle,
-        backgroundColor: 'red',
-      })
+      .sprite(width * 0.5, height - BOTTOM_MARGIN, 'jump-rocket-button')
+      .setOrigin(0, 0)
       .setScrollFactor(0);
 
     leftButton.setInteractive().on('pointerdown', () => {
@@ -193,7 +192,7 @@ export default class GameScene extends Phaser.Scene {
     if (playerGameY < 0) {
       this.cameras.main.setScroll(
         0,
-        playerGameY + this.game.scale.height * 0.2
+        playerGameY + this.game.scale.height * 0.15
       );
       background.setPosition(0, playerGameY * 0.5);
     }
