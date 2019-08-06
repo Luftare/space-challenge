@@ -140,12 +140,12 @@ export default class GameScene extends Phaser.Scene {
     };
 
     leftButton = this.add
-      .sprite(0, height - BOTTOM_MARGIN, 'toggle-direction-button')
-      .setOrigin(0, 0)
+      .sprite(0, height, 'toggle-direction-button')
+      .setOrigin(0, 1)
       .setScrollFactor(0);
     rightButton = this.add
-      .sprite(width * 0.5, height - BOTTOM_MARGIN, 'jump-rocket-button')
-      .setOrigin(0, 0)
+      .sprite(width * 0.5, height, 'jump-rocket-button')
+      .setOrigin(0, 1)
       .setScrollFactor(0);
 
     leftButton.setInteractive().on('pointerdown', () => {
