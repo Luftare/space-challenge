@@ -22,6 +22,8 @@ let playerFlashTween;
 let playerShrinkTween;
 let playerSpawning = false;
 let rocket;
+let playerRocketSmokeEmitter;
+let playerRocketFireEmitter;
 let rocketSmokeEmitter;
 let rocketFireEmitter;
 let background;
@@ -67,6 +69,31 @@ export default class GameScene extends Phaser.Scene {
       'background'
     );
 
+    playerRocketSmokeEmitter = this.add.particles('smoke').createEmitter({
+      x: { min: -10, max: 10 },
+      y: { min: 20, max: 70 },
+      speedY: { min: 50, max: 150 },
+      speedX: { min: -50, max: 50 },
+      rotate: { min: 0, max: 360 },
+      scale: { start: 0.2, end: 0.7 },
+      gravityY: 0,
+      quantity: 1,
+      lifespan: { min: 250, max: 800 },
+    });
+
+    playerRocketFireEmitter = this.add.particles('fire').createEmitter({
+      x: { min: -5, max: 5 },
+      y: 20,
+      speedY: { min: 100, max: 180 },
+      speedX: { min: -50, max: 50 },
+      rotate: { min: 0, max: 360 },
+      gravityY: 0,
+      scale: { start: 0.5, end: 0.1 },
+      quantity: 1,
+      lifespan: { min: 320, max: 560 },
+      blendMode: 'ADD',
+    });
+
     rocketSmokeEmitter = this.add.particles('smoke').createEmitter({
       x: { min: -10, max: 10 },
       y: { min: 20, max: 70 },
@@ -80,18 +107,20 @@ export default class GameScene extends Phaser.Scene {
     });
 
     rocketFireEmitter = this.add.particles('fire').createEmitter({
-      x: { min: -5, max: 5 },
-      y: 20,
+      x: { min: -10, max: 10 },
+      y: 40,
       speedY: { min: 100, max: 180 },
       speedX: { min: -50, max: 50 },
       rotate: { min: 0, max: 360 },
       gravityY: 0,
-      scale: { start: 0.5, end: 0.1 },
+      scale: { start: 0.8, end: 0.1 },
       quantity: 1,
       lifespan: { min: 320, max: 560 },
       blendMode: 'ADD',
     });
 
+    playerRocketSmokeEmitter.stop();
+    playerRocketFireEmitter.stop();
     rocketSmokeEmitter.stop();
     rocketFireEmitter.stop();
 
@@ -198,9 +227,21 @@ export default class GameScene extends Phaser.Scene {
             duration: 300,
             repeat: 0,
             onComplete: () => {
+              rocket.setFrame(2);
+              rocketSmokeEmitter.start();
+              rocketFireEmitter.start();
+
               setTimeout(() => {
-                this.respawn();
-              }, 3000);
+                this.tweens.add({
+                  targets: rocket,
+                  y: '-=2000',
+                  duration: 3000,
+                  ease: 'Cubic.easeIn',
+                  onComplete: () => {
+                    this.scene.start('score');
+                  },
+                });
+              }, 1000);
             },
           });
         }
@@ -209,8 +250,10 @@ export default class GameScene extends Phaser.Scene {
 
     input = this.input.keyboard.createCursorKeys();
 
-    rocketSmokeEmitter.startFollow(player);
-    rocketFireEmitter.startFollow(player);
+    playerRocketSmokeEmitter.startFollow(player);
+    playerRocketFireEmitter.startFollow(player);
+    rocketFireEmitter.startFollow(rocket);
+    rocketSmokeEmitter.startFollow(rocket);
   }
 
   update() {
@@ -262,13 +305,13 @@ export default class GameScene extends Phaser.Scene {
         -PLAYER_ROCKET_ACCELERATION_Y
       );
       playerFuel--;
-      rocketSmokeEmitter.start();
-      rocketFireEmitter.start();
-      rocketSmokeEmitter.setSpeedX(-playerDirection * 50);
-      rocketFireEmitter.setSpeedX(-playerDirection * 50);
+      playerRocketSmokeEmitter.start();
+      playerRocketFireEmitter.start();
+      playerRocketSmokeEmitter.setSpeedX(-playerDirection * 50);
+      playerRocketFireEmitter.setSpeedX(-playerDirection * 50);
     } else {
-      rocketSmokeEmitter.stop();
-      rocketFireEmitter.stop();
+      playerRocketSmokeEmitter.stop();
+      playerRocketFireEmitter.stop();
       player.body.acceleration.set(0, 0);
     }
 

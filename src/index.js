@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import BootState from './states/boot';
 import GameState from './states/game';
+import GameScore from './states/score';
 import { isMobileDevice } from './utils';
 
 const mobile = isMobileDevice();
@@ -18,7 +19,7 @@ const gameConfig = {
   },
   pixelArt: true,
   title: 'Space dash',
-  scene: [BootState, GameState],
+  scene: [BootState, GameState, GameScore],
 };
 
 function newGame() {
