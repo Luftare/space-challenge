@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import level from '../levels/level-0';
 
 const GRAVITY = 300;
 const PLAYER_VELOCITY = 100;
@@ -10,13 +11,15 @@ const BOTTOM_MARGIN = 120;
 const GRID_SIZE = 60;
 
 let player;
-let playerDirection = -1;
+let playerDirection = 1;
 let playerFailed = false;
 let playerFuel = 0;
 let playerRocketing = false;
 let playerSpawnPoint = { x: 0, y: 0 };
 let playerFlashTween;
-let rocketEmitter;
+let playerSpawning = false;
+let rocketSmokeEmitter;
+let rocketFireEmitter;
 let platforms;
 let turnToggleInputPressed = false;
 let input;
@@ -28,28 +31,11 @@ function requestPlayerJump(player) {
 
   if (blocked.down && !blocked.up) {
     player.setVelocityY(-PLAYER_JUMP_VELOCITY);
-    // playerFuel = MAX_PLAYER_FUEL;
     return true;
   }
 
   return false;
 }
-
-const _ = null;
-
-const tiles = [
-  [_, _, _, _, _, _, _, _, 5, _],
-  [_, _, _, _, _, _, _, _, _, _],
-  [_, 0, 3, 6, _, _, _, _, _, _],
-  [_, _, _, _, _, _, _, _, _, _],
-  [_, _, _, _, _, _, _, _, _, _],
-  [_, _, _, _, _, _, 3, 2, 1, _],
-  [_, _, _, _, _, _, _, _, _, _],
-  [_, _, _, _, _, _, _, _, _, _],
-  [_, 1, 0, 4, _, _, _, _, _, _],
-  [_, _, _, _, _, _, _, _, _, _],
-  [_, _, _, _, _, _, 3, 0, 2, 1],
-];
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -69,13 +55,13 @@ export default class GameScene extends Phaser.Scene {
     const { width, height } = this.game.scale;
 
     playerSpawnPoint = {
-      x: width - 25,
-      y: height - GRID_SIZE * 1.5 - BOTTOM_MARGIN,
+      x: (level.spawnPoint.x + 0.5) * GRID_SIZE,
+      y: height - (level.spawnPoint.y + 0.5) * GRID_SIZE - BOTTOM_MARGIN,
     };
 
-    this.add.sprite(width * 0.5, height * 0.5, 'background');
+    this.add.tileSprite(0, -1000, 2000, 4000, 'background');
 
-    rocketEmitter = this.add.particles('smoke').createEmitter({
+    rocketSmokeEmitter = this.add.particles('smoke').createEmitter({
       x: 0,
       y: 23,
       speedY: { min: 250, max: 450 },
@@ -87,10 +73,23 @@ export default class GameScene extends Phaser.Scene {
       lifespan: { min: 150, max: 300 },
     });
 
-    rocketEmitter.setAlpha(0.5, 1, 300);
-    rocketEmitter.stop();
+    rocketFireEmitter = this.add.particles('fire').createEmitter({
+      x: 0,
+      y: 20,
+      speedY: { min: 250, max: 350 },
+      speedX: { min: -50, max: 50 },
+      rotate: { min: 0, max: 360 },
+      gravityY: 0,
+      scale: 0.05,
+      quantity: 1,
+      lifespan: { min: 20, max: 60 },
+    });
 
-    player = this.physics.add.sprite(0, 0, 'player').setSize(16, 48);
+    rocketSmokeEmitter.setAlpha(0.5, 1, 300);
+    rocketSmokeEmitter.stop();
+    rocketFireEmitter.stop();
+
+    player = this.physics.add.sprite(0, 0, 'player').setSize(30, 50);
     player.setBounce(0.0);
     player.setCollideWorldBounds(false);
 
@@ -98,8 +97,9 @@ export default class GameScene extends Phaser.Scene {
       targets: player,
       alpha: 0,
       duration: 200,
-      repeat: 2,
+      repeat: 3,
       onComplete: () => {
+        playerSpawning = false;
         player.alpha = 1;
       },
     });
@@ -108,7 +108,7 @@ export default class GameScene extends Phaser.Scene {
 
     platforms = this.physics.add.staticGroup();
 
-    tiles.reverse().forEach((row, gridY) => {
+    level.tiles.reverse().forEach((row, gridY) => {
       row.forEach((value, gridX) => {
         if (value === null) return;
         platforms
@@ -163,7 +163,8 @@ export default class GameScene extends Phaser.Scene {
 
     input = this.input.keyboard.createCursorKeys();
 
-    rocketEmitter.startFollow(player);
+    rocketSmokeEmitter.startFollow(player);
+    rocketFireEmitter.startFollow(player);
   }
 
   update() {
@@ -197,10 +198,13 @@ export default class GameScene extends Phaser.Scene {
         -PLAYER_ROCKET_ACCELERATION_Y
       );
       playerFuel--;
-      rocketEmitter.start();
-      rocketEmitter.setSpeedX(-playerDirection * 50);
+      rocketSmokeEmitter.start();
+      rocketFireEmitter.start();
+      rocketSmokeEmitter.setSpeedX(-playerDirection * 50);
+      rocketFireEmitter.setSpeedX(-playerDirection * 50);
     } else {
-      rocketEmitter.stop();
+      rocketSmokeEmitter.stop();
+      rocketFireEmitter.stop();
       player.body.acceleration.set(0, 0);
     }
 
@@ -211,6 +215,11 @@ export default class GameScene extends Phaser.Scene {
 
   updateMovement() {
     const blocked = player.body.blocked;
+
+    if (playerSpawning) {
+      player.setVelocityX(0);
+      return;
+    }
 
     if (playerDirection === -1 && !blocked.left) {
       if (blocked.down) {
@@ -225,6 +234,14 @@ export default class GameScene extends Phaser.Scene {
 
   updateAnimations() {
     const blocked = player.body.blocked;
+
+    if (playerSpawning) {
+      player.play(
+        playerDirection === 1 ? 'player-stand-right' : 'player-stand-left',
+        true
+      );
+      return;
+    }
 
     if (blocked.down) {
       player.play(
@@ -261,9 +278,10 @@ export default class GameScene extends Phaser.Scene {
     playerFailed = false;
     player.setPosition(playerSpawnPoint.x, playerSpawnPoint.y, 0, 0);
     player.setVelocity(0, 0);
-    playerDirection = -1;
+    playerDirection = level.startDirection;
     playerFuel = 0;
     playerRocketing = false;
+    playerSpawning = true;
     playerFlashTween.restart();
   }
 }

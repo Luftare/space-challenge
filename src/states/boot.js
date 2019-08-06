@@ -10,6 +10,7 @@ export default class BootScene extends Phaser.Scene {
     });
     this.load.image('background', require('../assets/background.png'));
     this.load.image('smoke', require('../assets/smoke.png'));
+    this.load.image('fire', require('../assets/fire.png'));
     this.load.spritesheet('tiles', require('../assets/tiles.png'), {
       frameWidth: 60,
       frameHeight: 60,
@@ -40,6 +41,18 @@ export default class BootScene extends Phaser.Scene {
       frames: this.anims.generateFrameNumbers('player', { start: 0, end: 7 }),
       frameRate: 10,
       repeat: -1,
+    });
+
+    this.anims.create({
+      key: 'player-stand-left',
+      frames: [{ key: 'player', frame: 0 }],
+      frameRate: 20,
+    });
+
+    this.anims.create({
+      key: 'player-stand-right',
+      frames: [{ key: 'player', frame: 9 }],
+      frameRate: 20,
     });
 
     this.anims.create({
