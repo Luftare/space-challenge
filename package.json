@@ -5,14 +5,20 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "parcel serve src/index.html",
-    "build": "parcel build src/index.html"
+    "dev:client": "parcel serve src/index.html",
+    "build": "parcel build src/index.html",
+    "dev:server": "nodemon  --ignore './dist/' server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "express": "^4.17.1",
     "parcel": "^1.12.3",
-    "phaser": "^3.18.1"
+    "phaser": "^3.18.1",
+    "socketio": "^1.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.1"
   }
 }

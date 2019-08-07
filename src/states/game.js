@@ -10,6 +10,7 @@ const PLAYER_ROCKET_ACCELERATION_Y = 600;
 const MAX_PLAYER_FUEL = 50;
 const BOTTOM_MARGIN = 150;
 const GRID_SIZE = 60;
+const EMIT_UPDATE_DT = 20;
 
 let player;
 let playerDirection = 1;
@@ -22,6 +23,7 @@ let playerSpawnPoint = { x: 0, y: 0 };
 let playerFlashTween;
 let playerShrinkTween;
 let playerSpawning = false;
+let playerName = '';
 let rocket;
 let rocketDirection = 1;
 let playerRocketSmokeEmitter;
@@ -34,6 +36,12 @@ let turnToggleInputPressed = false;
 let input;
 let leftButton;
 let rightButton;
+
+let socket;
+let lastUpdateTime = Date.now();
+
+let remotePlayers = [];
+let remotePlayerSprites = {};
 
 function requestPlayerJump(player) {
   const blocked = player.body.blocked;
@@ -57,6 +65,32 @@ export default class GameScene extends Phaser.Scene {
           debug: false,
         },
       },
+    });
+  }
+
+  init(data) {
+    remotePlayers = [];
+    remotePlayerSprites = {};
+    socket = window.globalContext.socket;
+    playerName = window.globalContext.name;
+    socket.removeAllListeners();
+
+    socket.on('STATE_UPDATE', state => {
+      remotePlayers = state;
+      state.forEach(remotePlayer => {
+        if (remotePlayerSprites[remotePlayer.id]) {
+          const sprite = remotePlayerSprites[remotePlayer.id];
+          sprite.setPosition(remotePlayer.x, remotePlayer.y);
+          sprite.setFrame(remotePlayer.d === -1 ? 0 : 8);
+        } else {
+          remotePlayerSprites[remotePlayer.id] = this.add.sprite(
+            remotePlayer.x,
+            remotePlayer.y,
+            'player',
+            0
+          );
+        }
+      });
     });
   }
 
@@ -288,6 +322,8 @@ export default class GameScene extends Phaser.Scene {
     playerRocketFireEmitter.startFollow(player);
     rocketFireEmitter.startFollow(rocket);
     rocketSmokeEmitter.startFollow(rocket);
+
+    this.emitUpdate({ name: playerName });
   }
 
   update() {
@@ -300,6 +336,8 @@ export default class GameScene extends Phaser.Scene {
 
     this.updateMovement();
     this.updateAnimations();
+
+    this.emitUpdate();
   }
 
   updateCamera() {
@@ -439,5 +477,22 @@ export default class GameScene extends Phaser.Scene {
     playerRocketing = false;
     playerSpawning = true;
     playerFlashTween.restart();
+  }
+
+  emitUpdate(extraProperties = {}) {
+    const now = Date.now();
+    const sinceLastUpdate = now - lastUpdateTime;
+    const shouldUpdate = sinceLastUpdate >= EMIT_UPDATE_DT;
+
+    if (shouldUpdate) {
+      socket.emit('PLAYER_UPDATE', {
+        x: player.body.center.x,
+        y: player.body.center.y,
+        d: playerDirection,
+        ...extraProperties,
+      });
+
+      lastUpdateTime = now;
+    }
   }
 }

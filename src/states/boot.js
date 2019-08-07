@@ -124,7 +124,7 @@ export default class BootScene extends Phaser.Scene {
       yoyo: true,
     });
 
-    this.scene.start('game');
+    this.scene.start('login');
   }
 
   update() {}
