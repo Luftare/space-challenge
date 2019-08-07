@@ -13,6 +13,7 @@ const GRID_SIZE = 60;
 
 let player;
 let playerDirection = 1;
+let playerStartDirection = 1;
 let playerFailed = false;
 let playerFuel = 0;
 let playerRocketing = false;
@@ -22,6 +23,7 @@ let playerFlashTween;
 let playerShrinkTween;
 let playerSpawning = false;
 let rocket;
+let rocketDirection = 1;
 let playerRocketSmokeEmitter;
 let playerRocketFireEmitter;
 let rocketSmokeEmitter;
@@ -129,22 +131,24 @@ export default class GameScene extends Phaser.Scene {
     level.tiles.forEach((row, gridY) => {
       row.forEach((value, gridX) => {
         if (value === obstacleMap._) return; //empty space
-        if (value === obstacleMap.E) {
+        if (value === obstacleMap.r || value === obstacleMap.R) {
           rocket = this.physics.add.sprite(
             (gridX + 0.5) * GRID_SIZE,
             height - (gridY + 0.5) * GRID_SIZE - BOTTOM_MARGIN,
             'rocket',
-            0
+            value === obstacleMap.r ? 0 : 4
           );
-          //end
+          rocketDirection = value === obstacleMap.r ? -1 : 1;
           return;
         }
-        if (value === obstacleMap.S) {
+        if (value === obstacleMap.s || value === obstacleMap.S) {
+          playerStartDirection = value === obstacleMap.s ? -1 : 1;
           //spawnpoint
           playerSpawnPoint = {
             x: (gridX + 0.5) * GRID_SIZE,
             y: height - (gridY + 0.5) * GRID_SIZE - BOTTOM_MARGIN,
           };
+          player;
           return;
         }
         //tile variations
@@ -227,21 +231,51 @@ export default class GameScene extends Phaser.Scene {
             duration: 300,
             repeat: 0,
             onComplete: () => {
-              rocket.setFrame(2);
-              rocketSmokeEmitter.start();
-              rocketFireEmitter.start();
+              this.tweens.add({
+                targets: rocket,
+                scaleX: 1.4,
+                scaleY: 0.8,
+                y: '+=8',
+                duration: 80,
+                ease: 'Cubic.easeOut',
+                yoyo: true,
+                onComplete: () => {
+                  rocket.play(
+                    `rocket-flash-${rocketDirection === -1 ? 'left' : 'right'}`
+                  );
 
-              setTimeout(() => {
-                this.tweens.add({
-                  targets: rocket,
-                  y: '-=2000',
-                  duration: 3000,
-                  ease: 'Cubic.easeIn',
-                  onComplete: () => {
-                    this.scene.start('score');
-                  },
-                });
-              }, 1000);
+                  setTimeout(() => {
+                    rocket.play(
+                      `rocket-close-hatch-${
+                        rocketDirection === -1 ? 'left' : 'right'
+                      }`
+                    );
+                    rocketSmokeEmitter.start();
+                    rocketFireEmitter.start();
+
+                    this.tweens.add({
+                      targets: rocket,
+                      scaleX: 1.8,
+                      scaleY: 0.4,
+                      y: '+=10',
+                      duration: 300,
+                      ease: 'Cubic.easeOut',
+                      yoyo: true,
+                      onComplete: () => {
+                        this.tweens.add({
+                          targets: rocket,
+                          y: '-=1500',
+                          duration: 3000,
+                          ease: 'Cubic.easeOut',
+                          onComplete: () => {
+                            this.scene.start('score');
+                          },
+                        });
+                      },
+                    });
+                  }, 1000);
+                },
+              });
             },
           });
         }
@@ -400,7 +434,7 @@ export default class GameScene extends Phaser.Scene {
     playerFinished = false;
     player.setPosition(playerSpawnPoint.x, playerSpawnPoint.y, 0, 0);
     player.setVelocity(0, 0);
-    playerDirection = level.startDirection;
+    playerDirection = playerStartDirection;
     playerFuel = 0;
     playerRocketing = false;
     playerSpawning = true;

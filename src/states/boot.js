@@ -88,7 +88,7 @@ export default class BootScene extends Phaser.Scene {
     this.anims.create({
       key: 'player-rocketing-right',
       frames: [{ key: 'player', frame: 17 }],
-      frameRate: 20,
+      frameRate: 5,
     });
 
     this.anims.create({
@@ -96,6 +96,32 @@ export default class BootScene extends Phaser.Scene {
       frames: this.anims.generateFrameNumbers('player', { start: 8, end: 15 }),
       frameRate: 10,
       repeat: -1,
+    });
+
+    this.anims.create({
+      key: 'rocket-close-hatch-left',
+      frames: this.anims.generateFrameNumbers('rocket', { start: 0, end: 2 }),
+      frameRate: 15,
+    });
+
+    this.anims.create({
+      key: 'rocket-close-hatch-right',
+      frames: this.anims.generateFrameNumbers('rocket', { start: 4, end: 6 }),
+      frameRate: 15,
+    });
+
+    this.anims.create({
+      key: 'rocket-flash-left',
+      frames: [{ key: 'rocket', frame: 0 }, { key: 'rocket', frame: 3 }],
+      frameRate: 12,
+      yoyo: true,
+    });
+
+    this.anims.create({
+      key: 'rocket-flash-right',
+      frames: [{ key: 'rocket', frame: 4 }, { key: 'rocket', frame: 7 }],
+      frameRate: 12,
+      yoyo: true,
     });
 
     this.scene.start('game');

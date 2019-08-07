@@ -1,7 +1,7 @@
-import { S, E, _ } from './obstacleMap';
+import { s, r, R, _ } from './obstacleMap';
 
 const tiles = [
-  [_, _, E, _, _, _, _, _, 5, _],
+  [_, _, _, _, _, _, _, _, 5, _],
   [_, 8, 2, 4, _, _, _, _, 5, _],
   [_, _, _, _, _, _, _, _, 5, _],
   [_, _, _, _, _, _, _, _, 5, _],
@@ -13,10 +13,8 @@ const tiles = [
   [_, _, _, _, _, _, _, _, _, _],
   [_, _, _, _, _, _, _, _, _, _],
   [_, 1, 0, 4, _, _, _, _, _, _],
-  [_, _, _, _, _, _, _, _, S, _],
+  [_, _, _, _, _, _, r, _, s, _],
   [_, _, _, _, _, _, 3, 0, 2, 1],
 ].reverse();
 
-const startDirection = -1;
-
-export default { startDirection, tiles };
+export default { tiles };
