@@ -11,11 +11,12 @@ let game;
 const gameConfig = {
   type: Phaser.AUTO,
   scale: {
-    mode: Phaser.Scale.FIT,
+    mode: Phaser.Scale.NONE,
     parent: 'game-root',
     autoCenter: Phaser.Scale.CENTER_BOTH,
     width: 600,
     height: 800,
+    zoom: 0.5,
   },
   pixelArt: true,
   title: 'Space dash',
