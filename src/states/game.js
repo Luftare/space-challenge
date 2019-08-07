@@ -155,7 +155,7 @@ export default class GameScene extends Phaser.Scene {
         platforms
           .create(
             (gridX + 0.5) * GRID_SIZE,
-            height - (gridY + 0.5) * GRID_SIZE - BOTTOM_MARGIN,
+            Math.round(height - (gridY + 0.5) * GRID_SIZE - BOTTOM_MARGIN),
             'tiles',
             value
           )
