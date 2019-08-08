@@ -71,6 +71,16 @@ export default class BootScene extends Phaser.Scene {
       });
 
       this.anims.create({
+        key: `${character}-walk-right`,
+        frames: this.anims.generateFrameNumbers(character, {
+          start: 8,
+          end: 15,
+        }),
+        frameRate: 10,
+        repeat: -1,
+      });
+
+      this.anims.create({
         key: `${character}-stand-left`,
         frames: [{ key: character, frame: 0 }],
         frameRate: 20,
@@ -104,16 +114,6 @@ export default class BootScene extends Phaser.Scene {
         key: `${character}-rocketing-right`,
         frames: [{ key: character, frame: 17 }],
         frameRate: 5,
-      });
-
-      this.anims.create({
-        key: `${character}-walk-right`,
-        frames: this.anims.generateFrameNumbers(character, {
-          start: 8,
-          end: 15,
-        }),
-        frameRate: 10,
-        repeat: -1,
       });
     });
 

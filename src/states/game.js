@@ -45,6 +45,43 @@ let lastUpdateTime = Date.now();
 let remotePlayers = [];
 let remotePlayerSprites = {};
 
+function updateOpponentAnimation(opponent) {
+  const flying = opponent.f;
+  const rocketing = opponent.r;
+  const direction = opponent.d;
+  const standing = opponent.s;
+  const character = opponent.character;
+
+  if (standing) {
+    return opponent.sprite.play(
+      direction === 1 ? `${character}-stand-right` : `${character}-stand-left`,
+      true
+    );
+  }
+
+  if (flying) {
+    return opponent.sprite.play(
+      direction === 1
+        ? `${character}-flying-right`
+        : `${character}-flying-left`,
+      true
+    );
+  }
+  if (rocketing) {
+    console.log('rocketing', opponent);
+    return opponent.sprite.play(
+      direction === 1
+        ? `${character}-rocketing-right`
+        : `${character}-rocketing-left`,
+      true
+    );
+  }
+  return opponent.sprite.play(
+    direction === 1 ? `${character}-walk-right` : `${character}-walk-left`,
+    true
+  );
+}
+
 function requestPlayerJump(player) {
   const blocked = player.body.blocked;
 
@@ -81,6 +118,10 @@ export default class GameScene extends Phaser.Scene {
 
     socket.on('STATE_UPDATE', updatedRemotePlayers => {
       updatedRemotePlayers.forEach(updatedRemotePlayer => {
+        remotePlayers = remotePlayers.map(p =>
+          p.id === updatedRemotePlayer.id ? { ...p, ...updatedRemotePlayer } : p
+        );
+
         const localRemotePlayer = remotePlayers.find(
           p => p.id === updatedRemotePlayer.id
         );
@@ -93,9 +134,16 @@ export default class GameScene extends Phaser.Scene {
             updatedRemotePlayer.x,
             updatedRemotePlayer.y
           );
-          localRemotePlayer.sprite.setFrame(
-            updatedRemotePlayer.d === -1 ? 0 : 8
+          remotePlayers = remotePlayers.map(p =>
+            p.id === updatedRemotePlayer.id
+              ? { ...p, ...updatedRemotePlayer }
+              : p
           );
+          updateOpponentAnimation(localRemotePlayer);
+          debugger;
+          // localRemotePlayer.sprite.setFrame(
+          //   updatedRemotePlayer.d === -1 ? 0 : 8
+          // );
         } else {
           remotePlayers.push({
             ...updatedRemotePlayer,
@@ -525,6 +573,9 @@ export default class GameScene extends Phaser.Scene {
         x: player.body.center.x,
         y: player.body.center.y,
         d: playerDirection,
+        r: playerRocketing,
+        f: !player.body.blocked.down,
+        s: playerSpawning,
         ...extraProperties,
       });
 

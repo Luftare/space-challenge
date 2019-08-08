@@ -8,7 +8,7 @@ let levelIndex = 0;
 const initGame = io => {
   setInterval(() => {
     io.sockets.emit('STATE_UPDATE', players);
-  }, 20);
+  }, 30);
 
   io.sockets.on('connection', socket => {
     let player = {};
@@ -29,6 +29,9 @@ const initGame = io => {
         totalTime: 0,
         totalScore: 0,
         name: '',
+        d: 1,
+        r: false,
+        f: false,
         x: 0,
         y: 0,
         ...data,
@@ -68,6 +71,7 @@ const initGame = io => {
             });
 
           io.sockets.emit('GAME_OVER', players);
+
           setTimeout(() => {
             console.log('NEW GAME!');
             countDownInterval = false;
@@ -77,7 +81,7 @@ const initGame = io => {
             });
 
             io.sockets.emit('PREPARE_LEVEL', { levelIndex });
-          }, 5000);
+          }, 8000);
         }
       }, 1000);
     });
