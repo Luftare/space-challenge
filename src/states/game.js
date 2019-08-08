@@ -75,20 +75,43 @@ export default class GameScene extends Phaser.Scene {
     playerName = window.globalContext.name;
     socket.removeAllListeners();
 
-    socket.on('STATE_UPDATE', state => {
-      remotePlayers = state;
-      state.forEach(remotePlayer => {
-        if (remotePlayerSprites[remotePlayer.id]) {
-          const sprite = remotePlayerSprites[remotePlayer.id];
-          sprite.setPosition(remotePlayer.x, remotePlayer.y);
-          sprite.setFrame(remotePlayer.d === -1 ? 0 : 8);
-        } else {
-          remotePlayerSprites[remotePlayer.id] = this.add.sprite(
-            remotePlayer.x,
-            remotePlayer.y,
-            'player',
-            0
+    socket.on('STATE_UPDATE', updatedRemotePlayers => {
+      updatedRemotePlayers.forEach(updatedRemotePlayer => {
+        const localRemotePlayer = remotePlayers.find(
+          p => p.id === updatedRemotePlayer.id
+        );
+
+        if (localRemotePlayer) {
+          localRemotePlayer.sprite.setPosition(
+            updatedRemotePlayer.x,
+            updatedRemotePlayer.y
           );
+          localRemotePlayer.sprite.setFrame(
+            updatedRemotePlayer.d === -1 ? 0 : 8
+          );
+        } else {
+          remotePlayers.push({
+            ...updatedRemotePlayer,
+            sprite: this.add.sprite(
+              updatedRemotePlayer.x,
+              updatedRemotePlayer.y,
+              'player',
+              0
+            ),
+          });
+        }
+      });
+
+      remotePlayers = remotePlayers.filter(remotePlayer => {
+        const playerIncludedInRemoteState = updatedRemotePlayers.some(
+          p => p.id === remotePlayer.id
+        );
+
+        if (playerIncludedInRemoteState) {
+          return true;
+        } else {
+          remotePlayer.sprite.destroy();
+          return false;
         }
       });
     });
