@@ -42,8 +42,11 @@ let rightButton;
 let socket;
 let lastUpdateTime = Date.now();
 
+let opponentsLayer;
 let remotePlayers = [];
 let remotePlayerSprites = {};
+
+let countDownText;
 
 function updateOpponentAnimation(opponent) {
   const flying = opponent.f;
@@ -156,14 +159,13 @@ export default class GameScene extends Phaser.Scene {
           updateOpponentEmitters(localRemotePlayer);
         } else {
           const emitters = this.createRocketEmitters();
-          const sprite = this.add.sprite(
+          const sprite = opponentsLayer.create(
             updatedRemotePlayer.x,
             updatedRemotePlayer.y,
             updatedRemotePlayer.character,
             0
           );
           sprite.setAlpha(0.6);
-          sprite.setZ(1);
 
           emitters.fire.startFollow(sprite);
           emitters.smoke.startFollow(sprite);
@@ -187,6 +189,21 @@ export default class GameScene extends Phaser.Scene {
           remotePlayer.sprite.destroy();
           return false;
         }
+      });
+    });
+
+    socket.on('COUNTDOWN', count => {
+      countDownText.setVisible(true);
+      countDownText.setScrollFactor(0);
+      countDownText.setText(count === 0 ? 'Go!' : count);
+      countDownText.setScale(2);
+
+      this.tweens.add({
+        targets: countDownText,
+        scale: count === 0 ? 0 : 1,
+        duration: count === 0 ? 1000 : 200,
+        ease: 'Cubic.easeOut',
+        onComplete: () => {},
       });
     });
 
@@ -356,10 +373,13 @@ export default class GameScene extends Phaser.Scene {
     rocketSmokeEmitter.stop();
     rocketFireEmitter.stop();
 
+    opponentsLayer = this.add.group();
+    opponentsLayer.setDepth(2);
+
     player = this.physics.add.sprite(0, 0, 'player').setSize(30, 54);
     player.setOffset(0.5, 0.5);
     player.setBounce(0.0);
-    player.setZ(2);
+    player.setDepth(3);
     player.setCollideWorldBounds(false);
 
     playerFlashTween = this.tweens.add({
@@ -416,9 +436,6 @@ export default class GameScene extends Phaser.Scene {
       playerRocketing = false;
     });
 
-    leftButton.setZ(3);
-    rightButton.setZ(3);
-
     this.physics.add.collider(player, platforms);
     rocket.body.setSize(40, 60);
     rocket.body.allowGravity = false;
@@ -438,6 +455,14 @@ export default class GameScene extends Phaser.Scene {
     playerRocketFireEmitter.startFollow(player);
     rocketFireEmitter.startFollow(rocket);
     rocketSmokeEmitter.startFollow(rocket);
+
+    countDownText = this.add.text(width * 0.5, 100, 0, {
+      fontSize: 60,
+      color: 'orange',
+    });
+    countDownText.setVisible(false);
+    countDownText.setOrigin(0.5, 0.5);
+    countDownText.setScrollFactor(0);
   }
 
   update() {

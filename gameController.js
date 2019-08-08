@@ -1,6 +1,6 @@
 let players = [];
 
-const COUNTDOWN_START = 5;
+const COUNTDOWN_START = 6;
 let countDownInterval = false;
 let countDown = COUNTDOWN_START;
 let levelIndex = 0;
@@ -43,6 +43,7 @@ const initGame = io => {
 
     socket.on('PLAYER_REACH_GOAL', ({ totalTime }) => {
       const player = players.find(p => p.id === socket.id);
+      if (!player) return;
       player.totalTime = totalTime;
       player.finished = true;
 
@@ -57,9 +58,9 @@ const initGame = io => {
       countDownInterval = setInterval(() => {
         countDown--;
 
-        if (countDown > 0) {
-          io.sockets.emit('COUNTDOWN', countDown--);
-        } else {
+        io.sockets.emit('COUNTDOWN', countDown);
+
+        if (countDown <= 0) {
           clearInterval(countDownInterval);
 
           players
@@ -75,6 +76,7 @@ const initGame = io => {
           setTimeout(() => {
             console.log('NEW GAME!');
             countDownInterval = false;
+            countDown = COUNTDOWN_START;
             players.forEach(player => {
               player.totalTime = 0;
               player.finished = false;
