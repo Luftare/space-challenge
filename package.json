@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev:client": "parcel serve src/index.html",
     "build": "parcel build src/index.html",
+    "postinstall": "npm run build",
     "dev:server": "nodemon  --ignore './dist/' server.js"
   },
   "keywords": [],
