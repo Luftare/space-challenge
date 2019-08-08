@@ -68,7 +68,6 @@ function updateOpponentAnimation(opponent) {
     );
   }
   if (rocketing) {
-    console.log('rocketing', opponent);
     return opponent.sprite.play(
       direction === 1
         ? `${character}-rocketing-right`
@@ -80,6 +79,20 @@ function updateOpponentAnimation(opponent) {
     direction === 1 ? `${character}-walk-right` : `${character}-walk-left`,
     true
   );
+}
+
+function updateOpponentEmitters(opponent) {
+  const rocketing = opponent.r;
+
+  if (rocketing) {
+    opponent.emitters.fire.setSpeedX(-opponent.d * 50);
+    opponent.emitters.smoke.setSpeedX(-opponent.d * 50);
+    opponent.emitters.fire.start();
+    opponent.emitters.smoke.start();
+  } else {
+    opponent.emitters.fire.stop();
+    opponent.emitters.smoke.stop();
+  }
 }
 
 function requestPlayerJump(player) {
@@ -140,19 +153,25 @@ export default class GameScene extends Phaser.Scene {
               : p
           );
           updateOpponentAnimation(localRemotePlayer);
-          debugger;
-          // localRemotePlayer.sprite.setFrame(
-          //   updatedRemotePlayer.d === -1 ? 0 : 8
-          // );
+          updateOpponentEmitters(localRemotePlayer);
         } else {
+          const emitters = this.createRocketEmitters();
+          const sprite = this.add.sprite(
+            updatedRemotePlayer.x,
+            updatedRemotePlayer.y,
+            updatedRemotePlayer.character,
+            0
+          );
+          sprite.setAlpha(0.6);
+          sprite.setZ(1);
+
+          emitters.fire.startFollow(sprite);
+          emitters.smoke.startFollow(sprite);
+
           remotePlayers.push({
             ...updatedRemotePlayer,
-            sprite: this.add.sprite(
-              updatedRemotePlayer.x,
-              updatedRemotePlayer.y,
-              updatedRemotePlayer.character,
-              0
-            ),
+            sprite,
+            emitters,
           });
         }
       });
@@ -340,6 +359,7 @@ export default class GameScene extends Phaser.Scene {
     player = this.physics.add.sprite(0, 0, 'player').setSize(30, 54);
     player.setOffset(0.5, 0.5);
     player.setBounce(0.0);
+    player.setZ(2);
     player.setCollideWorldBounds(false);
 
     playerFlashTween = this.tweens.add({
@@ -395,6 +415,9 @@ export default class GameScene extends Phaser.Scene {
     rightButton.setInteractive().on('pointerup', () => {
       playerRocketing = false;
     });
+
+    leftButton.setZ(3);
+    rightButton.setZ(3);
 
     this.physics.add.collider(player, platforms);
     rocket.body.setSize(40, 60);
@@ -561,6 +584,38 @@ export default class GameScene extends Phaser.Scene {
     playerRocketing = false;
     playerSpawning = true;
     playerFlashTween.restart();
+  }
+
+  createRocketEmitters() {
+    const smoke = this.add.particles('smoke').createEmitter({
+      x: { min: -10, max: 10 },
+      y: { min: 20, max: 70 },
+      speedY: { min: 50, max: 150 },
+      speedX: { min: -50, max: 50 },
+      rotate: { min: 0, max: 360 },
+      scale: { start: 0.2, end: 0.7 },
+      gravityY: 0,
+      quantity: 1,
+      lifespan: { min: 250, max: 800 },
+    });
+
+    const fire = this.add.particles('fire').createEmitter({
+      x: { min: -5, max: 5 },
+      y: 20,
+      speedY: { min: 100, max: 180 },
+      speedX: { min: -50, max: 50 },
+      rotate: { min: 0, max: 360 },
+      gravityY: 0,
+      scale: { start: 0.5, end: 0.1 },
+      quantity: 1,
+      lifespan: { min: 320, max: 560 },
+      blendMode: 'ADD',
+    });
+
+    fire.stop();
+    smoke.stop();
+
+    return { fire, smoke };
   }
 
   emitUpdate(extraProperties = {}) {
