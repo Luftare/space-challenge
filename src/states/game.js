@@ -25,6 +25,7 @@ let playerSpawnPoint = { x: 0, y: 0 };
 let playerFlashTween;
 let playerShrinkTween;
 let playerSpawning = false;
+let character;
 let rocket;
 let rocketDirection = 1;
 let playerRocketSmokeEmitter;
@@ -73,8 +74,9 @@ export default class GameScene extends Phaser.Scene {
     level = levels[data.levelIndex];
     remotePlayers = [];
     remotePlayerSprites = {};
+
     socket = window.globalContext.socket;
-    window.globalContext.name;
+    character = window.globalContext.character;
     socket.removeAllListeners();
 
     socket.on('STATE_UPDATE', updatedRemotePlayers => {
@@ -273,7 +275,6 @@ export default class GameScene extends Phaser.Scene {
             x: (gridX + 0.5) * GRID_SIZE,
             y: -(gridY + 0.5) * GRID_SIZE - BOTTOM_MARGIN,
           };
-          player;
           return;
         }
         //tile variations
@@ -288,7 +289,8 @@ export default class GameScene extends Phaser.Scene {
       });
     });
 
-    player = this.physics.add.sprite(0, 0, 'player').setSize(30, 50);
+    player = this.physics.add.sprite(0, 0, 'player').setSize(30, 54);
+    player.setOffset(0.5, 0.5);
     player.setBounce(0.0);
     player.setCollideWorldBounds(false);
 
@@ -365,8 +367,6 @@ export default class GameScene extends Phaser.Scene {
     playerRocketFireEmitter.startFollow(player);
     rocketFireEmitter.startFollow(rocket);
     rocketSmokeEmitter.startFollow(rocket);
-
-    this.emitUpdate({ name: window.globalContext.name });
   }
 
   update() {
@@ -457,17 +457,11 @@ export default class GameScene extends Phaser.Scene {
   updateAnimations() {
     const blocked = player.body.blocked;
 
-    if (playerFinished) {
+    if (playerFinished || playerSpawning) {
       player.play(
-        playerDirection === 1 ? 'player-stand-right' : 'player-stand-left',
-        true
-      );
-      return;
-    }
-
-    if (playerSpawning) {
-      player.play(
-        playerDirection === 1 ? 'player-stand-right' : 'player-stand-left',
+        playerDirection === 1
+          ? `${character}-stand-right`
+          : `${character}-stand-left`,
         true
       );
       return;
@@ -475,20 +469,24 @@ export default class GameScene extends Phaser.Scene {
 
     if (blocked.down) {
       player.play(
-        playerDirection === 1 ? 'player-walk-right' : 'player-walk-left',
+        playerDirection === 1
+          ? `${character}-walk-right`
+          : `${character}-walk-left`,
         true
       );
     } else {
       if (!playerRocketing) {
         player.play(
-          playerDirection === 1 ? 'player-flying-right' : 'player-flying-left',
+          playerDirection === 1
+            ? `${character}-flying-right`
+            : `${character}-flying-left`,
           true
         );
       } else {
         player.play(
           playerDirection === 1
-            ? 'player-rocketing-right'
-            : 'player-rocketing-left',
+            ? `${character}-rocketing-right`
+            : `${character}-rocketing-left`,
           true
         );
       }

@@ -35,6 +35,11 @@ const initGame = io => {
       players = players.map(p => (p.id === socket.id ? { ...p, ...state } : p));
     });
 
+    socket.on('LOGIN', data => {
+      players = players.map(p => (p.id === socket.id ? { ...p, ...data } : p));
+      socket.emit('JOIN_GAME', { levelIndex });
+    });
+
     socket.on('PLAYER_REACH_GOAL', ({ totalTime }) => {
       const player = players.find(p => p.id === socket.id);
       player.totalTime = totalTime;
