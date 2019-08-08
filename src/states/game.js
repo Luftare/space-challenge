@@ -190,7 +190,7 @@ export default class GameScene extends Phaser.Scene {
 
     background = this.add.tileSprite(
       0,
-      -height * 2,
+      -height * 3,
       width * 2,
       height * 8,
       'background'
@@ -259,7 +259,7 @@ export default class GameScene extends Phaser.Scene {
         if (value === obstacleMap.r || value === obstacleMap.R) {
           rocket = this.physics.add.sprite(
             (gridX + 0.5) * GRID_SIZE,
-            height - (gridY + 0.5) * GRID_SIZE - BOTTOM_MARGIN,
+            -(gridY + 0.5) * GRID_SIZE - BOTTOM_MARGIN,
             'rocket',
             value === obstacleMap.r ? 0 : 4
           );
@@ -271,7 +271,7 @@ export default class GameScene extends Phaser.Scene {
           //spawnpoint
           playerSpawnPoint = {
             x: (gridX + 0.5) * GRID_SIZE,
-            y: height - (gridY + 0.5) * GRID_SIZE - BOTTOM_MARGIN,
+            y: -(gridY + 0.5) * GRID_SIZE - BOTTOM_MARGIN,
           };
           player;
           return;
@@ -280,7 +280,7 @@ export default class GameScene extends Phaser.Scene {
         platforms
           .create(
             (gridX + 0.5) * GRID_SIZE,
-            Math.round(height - (gridY + 0.5) * GRID_SIZE - BOTTOM_MARGIN),
+            Math.round(-(gridY + 0.5) * GRID_SIZE - BOTTOM_MARGIN),
             'tiles',
             value
           )
@@ -384,18 +384,13 @@ export default class GameScene extends Phaser.Scene {
   }
 
   updateCamera() {
-    if (playerFinished) return;
+    if (playerFinished || playerFailed) return;
 
-    const playerGameY =
-      player.body.bottom + GRID_SIZE * 3 - this.game.scale.height;
-
-    if (playerGameY < 0) {
-      this.cameras.main.setScroll(
-        0,
-        playerGameY + this.game.scale.height * 0.15
-      );
-      background.setPosition(0, playerGameY * 0.5);
-    }
+    this.cameras.main.setScroll(
+      0,
+      player.body.bottom - this.scale.height * 0.6
+    );
+    background.setPosition(0, player.body.bottom * 0.5);
   }
 
   handleInput() {
@@ -501,7 +496,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   handleFailing() {
-    const didFail = player.body.bottom >= this.game.scale.height;
+    const didFail = player.body.bottom >= 0;
 
     if (didFail) {
       playerFailed = true;
