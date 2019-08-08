@@ -7,10 +7,9 @@ const io = require('socket.io')(http, {
   pingInterval: 2000,
   cookie: false,
 });
-const port = 8000;
+const port = process.env.PORT || 8000;
 
 app.use('/', express.static(__dirname + '/dist'));
-app.use('/', express.static(__dirname + '/node_modules/socket.io-client/dist'));
 
 initGame(io);
 

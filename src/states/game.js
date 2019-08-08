@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import level from '../levels/level-0';
+import levels from '../levels';
 import * as obstacleMap from '../levels/obstacleMap';
 
 const GRAVITY = 300;
@@ -12,6 +12,8 @@ const BOTTOM_MARGIN = 150;
 const GRID_SIZE = 60;
 const EMIT_UPDATE_DT = 20;
 
+let level;
+let startTime;
 let player;
 let playerDirection = 1;
 let playerStartDirection = 1;
@@ -23,7 +25,6 @@ let playerSpawnPoint = { x: 0, y: 0 };
 let playerFlashTween;
 let playerShrinkTween;
 let playerSpawning = false;
-let playerName = '';
 let rocket;
 let rocketDirection = 1;
 let playerRocketSmokeEmitter;
@@ -69,10 +70,11 @@ export default class GameScene extends Phaser.Scene {
   }
 
   init(data) {
+    level = levels[data.levelIndex];
     remotePlayers = [];
     remotePlayerSprites = {};
     socket = window.globalContext.socket;
-    playerName = window.globalContext.name;
+    window.globalContext.name;
     socket.removeAllListeners();
 
     socket.on('STATE_UPDATE', updatedRemotePlayers => {
@@ -80,6 +82,9 @@ export default class GameScene extends Phaser.Scene {
         const localRemotePlayer = remotePlayers.find(
           p => p.id === updatedRemotePlayer.id
         );
+
+        const isSelf = updatedRemotePlayer.id === socket.id;
+        if (isSelf) return;
 
         if (localRemotePlayer) {
           localRemotePlayer.sprite.setPosition(
@@ -114,6 +119,69 @@ export default class GameScene extends Phaser.Scene {
           return false;
         }
       });
+    });
+
+    socket.on('PLAYER_REACH_GOAL', finishedPlayer => {
+      const isSelf = finishedPlayer.id === socket.id;
+      const sprite = isSelf
+        ? player
+        : remotePlayers.find(p => p.id === finishedPlayer.id).sprite;
+
+      this.tweens.add({
+        targets: sprite,
+        x: rocket.body.center.x,
+        scale: 0,
+        duration: 300,
+        repeat: 0,
+        onComplete: () => {
+          this.tweens.add({
+            targets: rocket,
+            scaleX: 1.4,
+            scaleY: 0.8,
+            y: '+=8',
+            duration: 80,
+            ease: 'Cubic.easeOut',
+            yoyo: true,
+            onComplete: () => {
+              rocket.play(
+                `rocket-flash-${rocketDirection === -1 ? 'left' : 'right'}`
+              );
+            },
+          });
+        },
+      });
+    });
+
+    socket.on('GAME_OVER', playerScores => {
+      rocket.play(
+        `rocket-close-hatch-${rocketDirection === -1 ? 'left' : 'right'}`
+      );
+
+      setTimeout(() => {
+        rocketSmokeEmitter.start();
+        rocketFireEmitter.start();
+
+        this.tweens.add({
+          targets: rocket,
+          scaleX: 1.8,
+          scaleY: 0.4,
+          y: '+=10',
+          duration: 300,
+          ease: 'Cubic.easeOut',
+          yoyo: true,
+          onComplete: () => {
+            this.tweens.add({
+              targets: rocket,
+              y: '-=1500',
+              duration: 3000,
+              ease: 'Cubic.easeOut',
+              onComplete: () => {
+                this.scene.start('score', { playerScores });
+              },
+            });
+          },
+        });
+      }, 500);
     });
   }
 
@@ -230,6 +298,10 @@ export default class GameScene extends Phaser.Scene {
       duration: 200,
       repeat: 3,
       onComplete: () => {
+        const firstSpawn = !startTime;
+        if (firstSpawn) {
+          startTime = Date.now();
+        }
         playerSpawning = false;
         player.alpha = 1;
       },
@@ -281,60 +353,8 @@ export default class GameScene extends Phaser.Scene {
       if (player.body.blocked.down) {
         if (!playerFinished) {
           playerFinished = true;
-          this.tweens.add({
-            targets: player,
-            x: rocket.body.center.x,
-            scale: 0,
-            duration: 300,
-            repeat: 0,
-            onComplete: () => {
-              this.tweens.add({
-                targets: rocket,
-                scaleX: 1.4,
-                scaleY: 0.8,
-                y: '+=8',
-                duration: 80,
-                ease: 'Cubic.easeOut',
-                yoyo: true,
-                onComplete: () => {
-                  rocket.play(
-                    `rocket-flash-${rocketDirection === -1 ? 'left' : 'right'}`
-                  );
-
-                  setTimeout(() => {
-                    rocket.play(
-                      `rocket-close-hatch-${
-                        rocketDirection === -1 ? 'left' : 'right'
-                      }`
-                    );
-                    rocketSmokeEmitter.start();
-                    rocketFireEmitter.start();
-
-                    this.tweens.add({
-                      targets: rocket,
-                      scaleX: 1.8,
-                      scaleY: 0.4,
-                      y: '+=10',
-                      duration: 300,
-                      ease: 'Cubic.easeOut',
-                      yoyo: true,
-                      onComplete: () => {
-                        this.tweens.add({
-                          targets: rocket,
-                          y: '-=1500',
-                          duration: 3000,
-                          ease: 'Cubic.easeOut',
-                          onComplete: () => {
-                            this.scene.start('score');
-                          },
-                        });
-                      },
-                    });
-                  }, 1000);
-                },
-              });
-            },
-          });
+          const totalTime = Date.now() - startTime;
+          socket.emit('PLAYER_REACH_GOAL', { totalTime });
         }
       }
     });
@@ -346,7 +366,7 @@ export default class GameScene extends Phaser.Scene {
     rocketFireEmitter.startFollow(rocket);
     rocketSmokeEmitter.startFollow(rocket);
 
-    this.emitUpdate({ name: playerName });
+    this.emitUpdate({ name: window.globalContext.name });
   }
 
   update() {

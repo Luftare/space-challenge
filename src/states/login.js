@@ -11,11 +11,13 @@ export default class BootScene extends Phaser.Scene {
     socket = io();
     window.globalContext = {
       socket,
-      name,
+      name: 'Jeppe',
     };
 
-    socket.on('connect', () => {
-      this.scene.start('game');
+    socket.on('connect', () => {});
+
+    socket.on('NEW_GAME', ({ levelIndex }) => {
+      this.scene.start('game', { levelIndex });
     });
   }
 
