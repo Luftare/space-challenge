@@ -265,6 +265,42 @@ export default class GameScene extends Phaser.Scene {
       'background'
     );
 
+    platforms = this.physics.add.staticGroup();
+
+    level.tiles.forEach((row, gridY) => {
+      row.forEach((value, gridX) => {
+        if (value === obstacleMap._) return; //empty space
+        if (value === obstacleMap.r || value === obstacleMap.R) {
+          rocket = this.physics.add.sprite(
+            (gridX + 0.5) * GRID_SIZE,
+            -(gridY + 0.5) * GRID_SIZE - BOTTOM_MARGIN,
+            'rocket',
+            value === obstacleMap.r ? 0 : 4
+          );
+          rocketDirection = value === obstacleMap.r ? -1 : 1;
+          return;
+        }
+        if (value === obstacleMap.s || value === obstacleMap.S) {
+          playerStartDirection = value === obstacleMap.s ? -1 : 1;
+          //spawnpoint
+          playerSpawnPoint = {
+            x: (gridX + 0.5) * GRID_SIZE,
+            y: -(gridY + 0.5) * GRID_SIZE - BOTTOM_MARGIN,
+          };
+          return;
+        }
+        //tile variations
+        platforms
+          .create(
+            (gridX + 0.5) * GRID_SIZE,
+            Math.round(-(gridY + 0.5) * GRID_SIZE - BOTTOM_MARGIN),
+            'tiles',
+            value
+          )
+          .refreshBody();
+      });
+    });
+
     playerRocketSmokeEmitter = this.add.particles('smoke').createEmitter({
       x: { min: -10, max: 10 },
       y: { min: 20, max: 70 },
@@ -319,42 +355,6 @@ export default class GameScene extends Phaser.Scene {
     playerRocketFireEmitter.stop();
     rocketSmokeEmitter.stop();
     rocketFireEmitter.stop();
-
-    platforms = this.physics.add.staticGroup();
-
-    level.tiles.forEach((row, gridY) => {
-      row.forEach((value, gridX) => {
-        if (value === obstacleMap._) return; //empty space
-        if (value === obstacleMap.r || value === obstacleMap.R) {
-          rocket = this.physics.add.sprite(
-            (gridX + 0.5) * GRID_SIZE,
-            -(gridY + 0.5) * GRID_SIZE - BOTTOM_MARGIN,
-            'rocket',
-            value === obstacleMap.r ? 0 : 4
-          );
-          rocketDirection = value === obstacleMap.r ? -1 : 1;
-          return;
-        }
-        if (value === obstacleMap.s || value === obstacleMap.S) {
-          playerStartDirection = value === obstacleMap.s ? -1 : 1;
-          //spawnpoint
-          playerSpawnPoint = {
-            x: (gridX + 0.5) * GRID_SIZE,
-            y: -(gridY + 0.5) * GRID_SIZE - BOTTOM_MARGIN,
-          };
-          return;
-        }
-        //tile variations
-        platforms
-          .create(
-            (gridX + 0.5) * GRID_SIZE,
-            Math.round(-(gridY + 0.5) * GRID_SIZE - BOTTOM_MARGIN),
-            'tiles',
-            value
-          )
-          .refreshBody();
-      });
-    });
 
     player = this.physics.add.sprite(0, 0, 'player').setSize(30, 54);
     player.setOffset(0.5, 0.5);
