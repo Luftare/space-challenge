@@ -11,24 +11,10 @@ const initGame = io => {
   }, 20);
 
   io.sockets.on('connection', socket => {
-    console.log('CONNECT: ' + socket.id);
-
-    const player = {
-      id: socket.id,
-      finished: false,
-      totalTime: 0,
-      totalScore: 0,
-      name: '',
-      x: 0,
-      y: 0,
-    };
-
-    players.push(player);
+    let player = {};
 
     socket.on('disconnect', () => {
       players = players.filter(player => player.id !== socket.id);
-      io.sockets.emit('PLAYER_DISCONNECTED', player);
-      console.log('DISCONN: ' + socket.id);
     });
 
     socket.on('PLAYER_UPDATE', state => {
@@ -36,7 +22,19 @@ const initGame = io => {
     });
 
     socket.on('LOGIN', data => {
-      players = players.map(p => (p.id === socket.id ? { ...p, ...data } : p));
+      const player = {
+        id: socket.id,
+        character: 'human',
+        finished: false,
+        totalTime: 0,
+        totalScore: 0,
+        name: '',
+        x: 0,
+        y: 0,
+        ...data,
+      };
+
+      players.push(player);
       socket.emit('JOIN_GAME', { levelIndex });
     });
 

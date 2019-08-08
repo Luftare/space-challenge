@@ -102,7 +102,7 @@ export default class GameScene extends Phaser.Scene {
             sprite: this.add.sprite(
               updatedRemotePlayer.x,
               updatedRemotePlayer.y,
-              'player',
+              updatedRemotePlayer.character,
               0
             ),
           });

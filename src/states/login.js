@@ -52,7 +52,7 @@ export default class BootScene extends Phaser.Scene {
       .setOrigin(0.5, 0.5)
       .setInteractive()
       .on('pointerdown', () => {
-        window.globalContext.name = prompt("What's your name?");
+        window.globalContext.name = 'Someone...'; //prompt("What's your name?");
 
         socket.emit('LOGIN', {
           name: window.globalContext.name,
