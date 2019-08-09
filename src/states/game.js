@@ -151,6 +151,10 @@ export default class GameScene extends Phaser.Scene {
             updatedRemotePlayer.x,
             updatedRemotePlayer.y
           );
+          localRemotePlayer.nameTag.setPosition(
+            updatedRemotePlayer.x,
+            updatedRemotePlayer.y - 40
+          );
           remotePlayers = remotePlayers.map(p =>
             p.id === updatedRemotePlayer.id
               ? { ...p, ...updatedRemotePlayer }
@@ -169,11 +173,14 @@ export default class GameScene extends Phaser.Scene {
             updatedRemotePlayer.character,
             sprite
           );
+          const nameTag = this.add.text(0, 0, updatedRemotePlayer.name);
+          nameTag.setOrigin(0.5, 0.5);
           sprite.setAlpha(0.6);
 
           remotePlayers.push({
             ...updatedRemotePlayer,
             sprite,
+            nameTag,
             emitters,
           });
         }
@@ -387,10 +394,12 @@ export default class GameScene extends Phaser.Scene {
     leftButton = this.add
       .sprite(0, height, 'toggle-direction-button')
       .setOrigin(0, 1)
+      .setDepth(10)
       .setScrollFactor(0);
     rightButton = this.add
       .sprite(width * 0.5, height, 'jump-rocket-button')
       .setOrigin(0, 1)
+      .setDepth(10)
       .setScrollFactor(0);
 
     leftButton.setInteractive().on('pointerdown', () => {
