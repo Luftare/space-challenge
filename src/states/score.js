@@ -40,16 +40,11 @@ export default class GameScene extends Phaser.Scene {
       .sort((a, b) => b.totalScore - a.totalScore)
       .forEach((player, position) => {
         const x = width * 0.1;
-        const y = 120 + position * 45;
+        const y = 120 + position * 50;
         this.add
-          .text(
-            x + 50,
-            y,
-            `${position + 1}: ${player.name}, ${player.totalScore}`,
-            {
-              fontSize: 30,
-            }
-          )
+          .text(x + 50, y, `${player.name}: ${player.totalScore}`, {
+            fontSize: 30,
+          })
           .setOrigin(0, 0.5);
 
         this.add
