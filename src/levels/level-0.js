@@ -1,4 +1,4 @@
-import { s, r, R, _ } from './obstacleMap';
+import { s, S, r, R, _ } from './obstacleMap';
 
 const tiles = [
   [_, R, _, _, _, _, _, _, 5, _],
