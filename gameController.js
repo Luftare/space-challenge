@@ -1,9 +1,10 @@
 let players = [];
 
 const COUNTDOWN_START = 6;
+const LEVEL_COUNT = 2;
 let countDownInterval = false;
 let countDown = COUNTDOWN_START;
-let levelIndex = 0;
+let levelIndex = Math.floor(Math.random() * LEVEL_COUNT);
 
 const initGame = io => {
   setInterval(() => {
@@ -81,7 +82,7 @@ const initGame = io => {
               player.totalTime = 0;
               player.finished = false;
             });
-
+            levelIndex = Math.floor(Math.random() * LEVEL_COUNT);
             io.sockets.emit('PREPARE_LEVEL', { levelIndex });
           }, 8000);
         }
