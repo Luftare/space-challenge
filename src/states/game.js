@@ -195,6 +195,7 @@ export default class GameScene extends Phaser.Scene {
           return true;
         } else {
           remotePlayer.sprite.destroy();
+          remotePlayer.nameTag.destroy();
           return false;
         }
       });
