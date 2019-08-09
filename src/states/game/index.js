@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
-import levels from '../levels';
-import * as obstacleMap from '../levels/obstacleMap';
+import levels from '../../levels';
+import * as obstacleMap from '../../levels/obstacleMap';
+import Emitter from './Emitter';
 
 const GRAVITY = 300;
 const PLAYER_VELOCITY = 100;
@@ -28,7 +29,7 @@ let playerSpawning = false;
 let character;
 let rocket;
 let rocketDirection = 1;
-let playerEmitters;
+let playerEmitter;
 let rocketSmokeEmitter;
 let rocketFireEmitter;
 let background;
@@ -84,18 +85,10 @@ function updateOpponentEmitters(opponent) {
   const rocketing = opponent.r;
 
   if (rocketing) {
-    if (opponent.emitters.fire) {
-      opponent.emitters.fire.setSpeedX(-opponent.d * 50);
-      opponent.emitters.fire.start();
-    }
-
-    if (opponent.emitters.smoke) {
-      opponent.emitters.smoke.setSpeedX(-opponent.d * 50);
-      opponent.emitters.smoke.start();
-    }
+    opponent.emitter.start();
+    opponent.emitter.applyDirection(opponent.d);
   } else {
-    if (opponent.emitters.fire) opponent.emitters.fire.stop();
-    if (opponent.emitters.smoke) opponent.emitters.smoke.stop();
+    opponent.emitter.stop();
   }
 }
 
@@ -163,16 +156,17 @@ export default class GameScene extends Phaser.Scene {
           updateOpponentAnimation(localRemotePlayer);
           updateOpponentEmitters(localRemotePlayer);
         } else {
+          const emitter = new Emitter(this, updatedRemotePlayer.character);
+
           const sprite = opponentsLayer.create(
             updatedRemotePlayer.x,
             updatedRemotePlayer.y,
             updatedRemotePlayer.character.name,
             0
           );
-          const emitters = this.createRocketEmitters(
-            updatedRemotePlayer.character,
-            sprite
-          );
+
+          emitter.follow(sprite);
+
           const nameTag = this.add.text(0, 0, updatedRemotePlayer.name);
           nameTag.setOrigin(0.5, 0.5);
           sprite.setAlpha(0.6);
@@ -181,7 +175,7 @@ export default class GameScene extends Phaser.Scene {
             ...updatedRemotePlayer,
             sprite,
             nameTag,
-            emitters,
+            emitter,
           });
         }
       });
@@ -358,12 +352,14 @@ export default class GameScene extends Phaser.Scene {
     opponentsLayer = this.add.group();
     opponentsLayer.setDepth(2);
 
+    playerEmitter = new Emitter(this, character);
+
     player = this.physics.add.sprite(0, 0, 'player').setSize(30, 54);
     player.setOffset(0.5, 0.5);
     player.setBounce(0.0);
     player.setDepth(3);
     player.setCollideWorldBounds(false);
-    playerEmitters = this.createRocketEmitters(character, player);
+    playerEmitter.follow(player);
 
     playerFlashTween = this.tweens.add({
       targets: player,
@@ -493,19 +489,12 @@ export default class GameScene extends Phaser.Scene {
         -PLAYER_ROCKET_ACCELERATION_Y
       );
       playerFuel--;
-      if (playerEmitters.fire) {
-        playerEmitters.fire.setSpeedX(-playerDirection * 50);
-        playerEmitters.fire.start();
-      }
 
-      if (playerEmitters.smoke) {
-        playerEmitters.smoke.setSpeedX(-playerDirection * 50);
-        playerEmitters.smoke.start();
-      }
+      playerEmitter.start();
+      playerEmitter.applyDirection(playerDirection);
     } else {
-      if (playerEmitters.fire) playerEmitters.fire.stop();
-      if (playerEmitters.smoke) playerEmitters.smoke.stop();
       player.body.acceleration.set(0, 0);
+      playerEmitter.stop();
     }
 
     if (blocked.down) {
@@ -593,48 +582,6 @@ export default class GameScene extends Phaser.Scene {
     playerRocketing = false;
     playerSpawning = true;
     playerFlashTween.restart();
-  }
-
-  createRocketEmitters(config, sprite) {
-    const emitters = {};
-
-    if (config.smoke) {
-      emitters.smoke = this.add.particles('smoke').createEmitter({
-        x: { min: -10, max: 10 },
-        y: { min: 20, max: 70 },
-        speedY: { min: 50, max: 150 },
-        speedX: { min: -50, max: 50 },
-        rotate: { min: 0, max: 360 },
-        scale: { start: 0.2, end: 0.7 },
-        gravityY: 0,
-        quantity: 1,
-        lifespan: { min: 250, max: 800 },
-        tint: config.smokeTint,
-        depth: 1,
-      });
-      emitters.smoke.stop();
-      emitters.smoke.startFollow(sprite);
-    }
-
-    if (config.fire) {
-      emitters.fire = this.add.particles('fire').createEmitter({
-        x: { min: -5, max: 5 },
-        y: 20,
-        speedY: { min: 100, max: 180 },
-        speedX: { min: -50, max: 50 },
-        rotate: { min: 0, max: 360 },
-        gravityY: 0,
-        scale: { start: 0.5, end: 0.1 },
-        quantity: 1,
-        lifespan: { min: 320, max: 560 },
-        blendMode: 'ADD',
-        depth: 1,
-      });
-      emitters.fire.stop();
-      emitters.fire.startFollow(sprite);
-    }
-
-    return emitters;
   }
 
   emitUpdate(extraProperties = {}) {
