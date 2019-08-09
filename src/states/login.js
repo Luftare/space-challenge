@@ -11,11 +11,8 @@ export default class BootScene extends Phaser.Scene {
   create() {
     const { width, height } = this.game.scale;
     socket = io();
-    window.globalContext = {
-      socket,
-      name: '',
-      character: characters[0],
-    };
+    window.globalContext.socket = socket;
+    window.globalContext.character = characters[0];
 
     this.add
       .text(width * 0.5, 80, 'Select character', {
@@ -52,13 +49,11 @@ export default class BootScene extends Phaser.Scene {
     const playButton = this.add
       .text(width * 0.5, height - 100, 'play', {
         fontSize: 60,
-        color: 'green',
+        color: 'yellow',
       })
       .setOrigin(0.5, 0.5)
       .setInteractive()
       .on('pointerdown', () => {
-        window.globalContext.name = 'Someone...'; //prompt("What's your name?");
-
         socket.emit('LOGIN', {
           name: window.globalContext.name,
           character: window.globalContext.character,

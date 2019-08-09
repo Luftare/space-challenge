@@ -67,4 +67,18 @@ if (module.hot) {
 const shouldCreateGame =
   !mobile || (mobile && window.innerWidth < window.innerHeight);
 
-if (!game && shouldCreateGame) newGame();
+document.getElementById('set-name-submit').addEventListener('click', () => {
+  const name = document.getElementById('name').value;
+  const validName = name.length > 1 && name.length < 10;
+
+  if (validName) {
+    window.globalContext = {
+      socket: null,
+      name,
+      character: {},
+    };
+    document.getElementById('set-name').style.display = 'none';
+    document.getElementById('game-root').hidden = false;
+    if (!game && shouldCreateGame) newGame();
+  }
+});

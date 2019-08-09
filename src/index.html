@@ -27,6 +27,7 @@
     body {
       margin: 0;
       background-color: black;
+      font-family: sans-serif;
     }
 
     #rotate-device {
@@ -39,8 +40,41 @@
       font-size: 46px;
       display: none;
     }
+
+    #set-name {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+      background: black;
+      color: yellow;
+      flex-direction: column;
+    }
+
+    #name {
+      font-size: 30px;
+      padding: 8px;
+      background: #aaa;
+      color: yellow;
+      border: none;
+    }
+
+    #set-name-submit {
+      margin-top: 48px;
+      padding: 8px 16px;
+      background-color: yellow;
+      color: black;
+      border: none;
+      font-size: 36px;
+    }
   </style>
-  <div id="game-root"></div>
+
+  <div id="set-name">
+    <input id="name" placeholder="Name" />
+    <button id="set-name-submit">Next</button>
+  </div>
+  <div id="game-root" hidden></div>
   <div id="rotate-device">Rotate 🤪</div>
   <script src="./index.js"></script>
 </body>
