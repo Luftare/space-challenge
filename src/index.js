@@ -69,7 +69,7 @@ const shouldCreateGame =
 
 document.getElementById('submit').addEventListener('click', () => {
   const name = document.getElementById('name').value;
-  const validName = name.length > 1 && name.length < 10;
+  const validName = name.length > 1 && name.length < 14;
 
   if (validName) {
     window.globalContext = {

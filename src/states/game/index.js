@@ -3,60 +3,28 @@ import levels from '../../levels';
 import * as obstacleMap from '../../levels/obstacleMap';
 import Emitter from './Emitter';
 import Opponent from './Opponent';
+import Player from './LocalPlayer';
 
 const GRAVITY = 300;
-const PLAYER_VELOCITY = 100;
-const PLAYER_JUMP_VELOCITY = 300;
-const PLAYER_ROCKET_ACCELERATION_X = 200;
-const PLAYER_ROCKET_ACCELERATION_Y = 600;
-const MAX_PLAYER_FUEL = 50;
 const BOTTOM_MARGIN = 150;
 const GRID_SIZE = 60;
 const EMIT_UPDATE_DT = 20;
 
 let level;
 let startTime;
-let player;
-let playerDirection = 1;
-let playerStartDirection = 1;
-let playerFailed = false;
-let playerFuel = 0;
-let playerRocketing = false;
-let playerFinished = false;
-let playerSpawnPoint = { x: 0, y: 0 };
-let playerFlashTween;
-let playerShrinkTween;
-let playerSpawning = false;
-let character;
 let rocket;
 let rocketDirection = 1;
-let playerEmitter;
 let rocketSmokeEmitter;
 let rocketFireEmitter;
 let background;
 let platforms;
-let turnToggleInputPressed = false;
-let input;
 let leftButton;
 let rightButton;
 
-let socket;
 let lastUpdateTime = Date.now();
 
 let opponentsLayer;
-
 let countDownText;
-
-function requestPlayerJump(player) {
-  const blocked = player.body.blocked;
-
-  if (blocked.down && !blocked.up) {
-    player.setVelocityY(-PLAYER_JUMP_VELOCITY);
-    return true;
-  }
-
-  return false;
-}
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -73,11 +41,15 @@ export default class GameScene extends Phaser.Scene {
   }
 
   init(data) {
-    level = levels[data.levelIndex];
+    this.level = levels[data.levelIndex];
     this.opponents = [];
+    this.socket = window.globalContext.socket;
+    this.setupSocketHandlers();
+  }
 
-    socket = window.globalContext.socket;
-    character = window.globalContext.character;
+  setupSocketHandlers() {
+    const socket = this.socket;
+
     socket.removeAllListeners();
 
     socket.on('STATE_UPDATE', playerModels => {
@@ -126,12 +98,12 @@ export default class GameScene extends Phaser.Scene {
 
     socket.on('PLAYER_REACH_GOAL', finishedPlayer => {
       const isSelf = finishedPlayer.id === socket.id;
-      const sprite = isSelf
-        ? player
-        : this.opponents.find(p => p.id === finishedPlayer.id).sprite;
+      const target = isSelf
+        ? this.player
+        : this.opponents.find(p => p.id === finishedPlayer.id);
 
       this.tweens.add({
-        targets: sprite,
+        targets: target.sprite,
         x: rocket.body.center.x,
         scale: 0,
         duration: 300,
@@ -201,39 +173,7 @@ export default class GameScene extends Phaser.Scene {
 
     platforms = this.physics.add.staticGroup();
 
-    level.tiles.forEach((row, gridY) => {
-      row.forEach((value, gridX) => {
-        if (value === obstacleMap._) return; //empty space
-        if (value === obstacleMap.r || value === obstacleMap.R) {
-          rocket = this.physics.add.sprite(
-            (gridX + 0.5) * GRID_SIZE,
-            -(gridY + 0.5) * GRID_SIZE - BOTTOM_MARGIN,
-            'rocket',
-            value === obstacleMap.r ? 0 : 4
-          );
-          rocketDirection = value === obstacleMap.r ? -1 : 1;
-          return;
-        }
-        if (value === obstacleMap.s || value === obstacleMap.S) {
-          playerStartDirection = value === obstacleMap.s ? -1 : 1;
-          //spawnpoint
-          playerSpawnPoint = {
-            x: (gridX + 0.5) * GRID_SIZE,
-            y: -(gridY + 0.5) * GRID_SIZE - BOTTOM_MARGIN,
-          };
-          return;
-        }
-        //tile variations
-        platforms
-          .create(
-            (gridX + 0.5) * GRID_SIZE,
-            Math.round(-(gridY + 0.5) * GRID_SIZE - BOTTOM_MARGIN),
-            'tiles',
-            value
-          )
-          .refreshBody();
-      });
-    });
+    this.decodeLevel(this.level);
 
     rocketSmokeEmitter = this.add.particles('smoke').createEmitter({
       x: { min: -10, max: 10 },
@@ -266,31 +206,8 @@ export default class GameScene extends Phaser.Scene {
     opponentsLayer = this.add.group();
     opponentsLayer.setDepth(2);
 
-    playerEmitter = new Emitter(this, character);
-
-    player = this.physics.add.sprite(0, 0, 'player').setSize(30, 54);
-    player.setOffset(0.5, 0.5);
-    player.setBounce(0.0);
-    player.setDepth(3);
-    player.setCollideWorldBounds(false);
-    playerEmitter.follow(player);
-
-    playerFlashTween = this.tweens.add({
-      targets: player,
-      alpha: 0,
-      duration: 200,
-      repeat: 3,
-      onComplete: () => {
-        const firstSpawn = !startTime;
-        if (firstSpawn) {
-          startTime = Date.now();
-        }
-        playerSpawning = false;
-        player.alpha = 1;
-      },
-    });
-
-    this.respawn();
+    this.player = new Player(this, window.globalContext.character);
+    this.player.respawn(this.spawnPoint);
 
     const buttonStyle = {
       fontSize: '24px',
@@ -314,37 +231,32 @@ export default class GameScene extends Phaser.Scene {
       .setScrollFactor(0);
 
     leftButton.setInteractive().on('pointerdown', () => {
-      if (playerSpawning) return;
-      playerDirection *= -1;
+      if (this.player.spawning) return;
+      this.player.direction *= -1;
     });
 
     rightButton.setInteractive().on('pointerdown', () => {
-      if (playerSpawning) return;
-      const didJump = requestPlayerJump(player);
-
-      if (!didJump) {
-        playerRocketing = true;
-      }
+      if (this.player.spawning) return;
+      this.player.requestJump();
     });
 
     rightButton.setInteractive().on('pointerup', () => {
-      playerRocketing = false;
+      this.player.rocketing = false;
     });
 
-    this.physics.add.collider(player, platforms);
+    this.physics.add.collider(this.player.sprite, platforms);
     rocket.body.setSize(40, 60);
     rocket.body.allowGravity = false;
-    this.physics.add.overlap(player, rocket, () => {
-      if (player.body.blocked.down) {
-        if (!playerFinished) {
-          playerFinished = true;
-          const totalTime = Date.now() - startTime;
-          socket.emit('PLAYER_REACH_GOAL', { totalTime });
+
+    this.physics.add.overlap(this.player.sprite, rocket, () => {
+      if (this.player.sprite.body.blocked.down) {
+        if (!this.player.finished) {
+          this.player.finished = true;
+          const totalTime = Date.now() - this.player.startTime;
+          this.socket.emit('PLAYER_REACH_GOAL', { totalTime });
         }
       }
     });
-
-    input = this.input.keyboard.createCursorKeys();
 
     rocketFireEmitter.startFollow(rocket);
     rocketSmokeEmitter.startFollow(rocket);
@@ -358,144 +270,55 @@ export default class GameScene extends Phaser.Scene {
     countDownText.setScrollFactor(0);
   }
 
+  decodeLevel(level) {
+    level.tiles.forEach((row, gridY) => {
+      row.forEach((value, gridX) => {
+        if (value === obstacleMap._) return; //empty space
+        if (value === obstacleMap.r || value === obstacleMap.R) {
+          rocket = this.physics.add.sprite(
+            (gridX + 0.5) * GRID_SIZE,
+            -(gridY + 0.5) * GRID_SIZE - BOTTOM_MARGIN,
+            'rocket',
+            value === obstacleMap.r ? 0 : 4
+          );
+          rocketDirection = value === obstacleMap.r ? -1 : 1;
+          return;
+        }
+        if (value === obstacleMap.s || value === obstacleMap.S) {
+          this.spawnPoint = {
+            x: (gridX + 0.5) * GRID_SIZE,
+            y: -(gridY + 0.5) * GRID_SIZE - BOTTOM_MARGIN,
+            direction: value === obstacleMap.s ? -1 : 1,
+          };
+          return;
+        }
+        //tile variations
+        platforms
+          .create(
+            (gridX + 0.5) * GRID_SIZE,
+            Math.round(-(gridY + 0.5) * GRID_SIZE - BOTTOM_MARGIN),
+            'tiles',
+            value
+          )
+          .refreshBody();
+      });
+    });
+  }
+
   update() {
     this.updateCamera();
-
-    if (!playerFailed) {
-      this.handleInput();
-      this.handleFailing();
-    }
-
-    this.updateMovement();
-    this.updateAnimations();
+    this.player.update();
     this.emitUpdate();
   }
 
   updateCamera() {
-    if (playerFinished || playerFailed) return;
+    if (this.player.finished || this.player.failed) return;
 
     this.cameras.main.setScroll(
       0,
-      player.body.bottom - this.scale.height * 0.6
+      this.player.sprite.body.bottom - this.scale.height * 0.6
     );
-    background.setPosition(0, player.body.bottom * 0.5);
-  }
-
-  handleInput() {
-    const blocked = player.body.blocked;
-
-    if (input.space.isDown && !turnToggleInputPressed) {
-      turnToggleInputPressed = true;
-      playerDirection *= -1;
-    }
-
-    if (!input.space.isDown) {
-      turnToggleInputPressed = false;
-    }
-
-    if (input.up.isDown) {
-      requestPlayerJump(player);
-    }
-
-    if (playerRocketing && playerFuel > 0) {
-      player.body.acceleration.set(
-        PLAYER_ROCKET_ACCELERATION_X * playerDirection,
-        -PLAYER_ROCKET_ACCELERATION_Y
-      );
-      playerFuel--;
-
-      playerEmitter.start();
-      playerEmitter.applyDirection(playerDirection);
-    } else {
-      player.body.acceleration.set(0, 0);
-      playerEmitter.stop();
-    }
-
-    if (blocked.down) {
-      playerFuel = MAX_PLAYER_FUEL;
-    }
-  }
-
-  updateMovement() {
-    const blocked = player.body.blocked;
-
-    if (playerFinished) {
-      player.setVelocity(0, 0);
-      return;
-    }
-
-    if (playerSpawning) {
-      player.setVelocityX(0);
-      return;
-    }
-
-    if (playerDirection === -1 && !blocked.left) {
-      if (blocked.down) {
-        player.setVelocityX(-PLAYER_VELOCITY);
-      }
-    } else if (playerDirection === 1 && !blocked.right) {
-      if (blocked.down) {
-        player.setVelocityX(PLAYER_VELOCITY);
-      }
-    }
-  }
-
-  updateAnimations() {
-    const blocked = player.body.blocked;
-    const name = character.name;
-
-    if (playerFinished || playerSpawning) {
-      player.play(
-        playerDirection === 1 ? `${name}-stand-right` : `${name}-stand-left`,
-        true
-      );
-      return;
-    }
-
-    if (blocked.down) {
-      player.play(
-        playerDirection === 1 ? `${name}-walk-right` : `${name}-walk-left`,
-        true
-      );
-    } else {
-      if (!playerRocketing) {
-        player.play(
-          playerDirection === 1
-            ? `${name}-flying-right`
-            : `${name}-flying-left`,
-          true
-        );
-      } else {
-        player.play(
-          playerDirection === 1
-            ? `${name}-rocketing-right`
-            : `${name}-rocketing-left`,
-          true
-        );
-      }
-    }
-  }
-
-  handleFailing() {
-    const didFail = player.body.bottom >= 0;
-
-    if (didFail) {
-      playerFailed = true;
-      setTimeout(this.respawn, 500);
-    }
-  }
-
-  respawn() {
-    playerFailed = false;
-    player.setScale(1, 1);
-    playerFinished = false;
-    player.setPosition(playerSpawnPoint.x, playerSpawnPoint.y, 0, 0);
-    player.setVelocity(0, 0);
-    playerDirection = playerStartDirection;
-    playerFuel = 0;
-    playerRocketing = false;
-    playerSpawning = true;
-    playerFlashTween.restart();
+    background.setPosition(0, this.player.sprite.body.bottom * 0.5);
   }
 
   emitUpdate(extraProperties = {}) {
@@ -504,13 +327,10 @@ export default class GameScene extends Phaser.Scene {
     const shouldUpdate = sinceLastUpdate >= EMIT_UPDATE_DT;
 
     if (shouldUpdate) {
-      socket.emit('PLAYER_UPDATE', {
-        x: player.body.center.x,
-        y: player.body.center.y,
-        d: playerDirection,
-        r: playerRocketing,
-        f: !player.body.blocked.down,
-        s: playerSpawning,
+      const model = this.player.getCompressedModel();
+
+      this.socket.emit('PLAYER_UPDATE', {
+        ...model,
         ...extraProperties,
       });
 
