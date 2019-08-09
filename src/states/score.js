@@ -48,7 +48,7 @@ export default class GameScene extends Phaser.Scene {
           .setOrigin(0, 0.5);
 
         this.add
-          .sprite(x, y, player.character, 0)
+          .sprite(x, y, player.character.name, 0)
           .setOrigin(0.5, 0.5)
           .setScale(0.8);
       });
