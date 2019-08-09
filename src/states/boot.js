@@ -23,6 +23,10 @@ export default class BootScene extends Phaser.Scene {
       frameHeight: 55,
     });
 
+    this.load.image('human-avatar', require('../assets/human-avatar.png'));
+    this.load.image('robot-avatar', require('../assets/robot-avatar.png'));
+    this.load.image('alien-avatar', require('../assets/alien-avatar.png'));
+
     this.load.spritesheet('rocket', require('../assets/rocket.png'), {
       frameWidth: 60,
       frameHeight: 60,
