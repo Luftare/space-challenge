@@ -67,7 +67,7 @@ if (module.hot) {
 const shouldCreateGame =
   !mobile || (mobile && window.innerWidth < window.innerHeight);
 
-document.getElementById('set-name-submit').addEventListener('click', () => {
+document.getElementById('submit').addEventListener('click', () => {
   const name = document.getElementById('name').value;
   const validName = name.length > 1 && name.length < 10;
 
@@ -77,8 +77,11 @@ document.getElementById('set-name-submit').addEventListener('click', () => {
       name,
       character: {},
     };
-    document.getElementById('set-name').style.display = 'none';
+    document.getElementById('login').style.display = 'none';
     document.getElementById('game-root').hidden = false;
-    if (!game && shouldCreateGame) newGame();
+
+    setTimeout(() => {
+      if (!game && shouldCreateGame) newGame();
+    }, 500);
   }
 });
