@@ -39,6 +39,12 @@ export default class Emitter {
     }
   }
 
+  destroy() {
+    this.emitters.forEach(emitter => {
+      emitter.stop();
+    });
+  }
+
   follow(target) {
     this.emitters.forEach(emitter => {
       emitter.startFollow(target);

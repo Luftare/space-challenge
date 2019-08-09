@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import levels from '../../levels';
 import * as obstacleMap from '../../levels/obstacleMap';
 import Emitter from './Emitter';
+import Opponent from './Opponent';
 
 const GRAVITY = 300;
 const PLAYER_VELOCITY = 100;
@@ -43,54 +44,8 @@ let socket;
 let lastUpdateTime = Date.now();
 
 let opponentsLayer;
-let remotePlayers = [];
-let remotePlayerSprites = {};
 
 let countDownText;
-
-function updateOpponentAnimation(opponent) {
-  const flying = opponent.f;
-  const rocketing = opponent.r;
-  const direction = opponent.d;
-  const standing = opponent.s;
-  const character = opponent.character;
-  const name = character.name;
-
-  if (standing) {
-    return opponent.sprite.play(
-      direction === 1 ? `${name}-stand-right` : `${name}-stand-left`,
-      true
-    );
-  }
-
-  if (flying) {
-    return opponent.sprite.play(
-      direction === 1 ? `${name}-flying-right` : `${name}-flying-left`,
-      true
-    );
-  }
-  if (rocketing) {
-    return opponent.sprite.play(
-      direction === 1 ? `${name}-rocketing-right` : `${name}-rocketing-left`,
-      true
-    );
-  }
-  return opponent.sprite.play(
-    direction === 1 ? `${name}-walk-right` : `${name}-walk-left`,
-    true
-  );
-}
-
-function updateOpponentEmitters(opponent) {
-  const rocketing = opponent.r;
-
-  if (rocketing) {
-    opponent.emitter.start();
-    opponent.emitter.applyDirection(opponent.d);
-  } else {
-    opponent.emitter.stop();
-  }
-}
 
 function requestPlayerJump(player) {
   const blocked = player.body.blocked;
@@ -119,77 +74,36 @@ export default class GameScene extends Phaser.Scene {
 
   init(data) {
     level = levels[data.levelIndex];
-    remotePlayers = [];
-    remotePlayerSprites = {};
+    this.opponents = [];
 
     socket = window.globalContext.socket;
     character = window.globalContext.character;
     socket.removeAllListeners();
 
-    socket.on('STATE_UPDATE', updatedRemotePlayers => {
-      updatedRemotePlayers.forEach(updatedRemotePlayer => {
-        remotePlayers = remotePlayers.map(p =>
-          p.id === updatedRemotePlayer.id ? { ...p, ...updatedRemotePlayer } : p
+    socket.on('STATE_UPDATE', playerModels => {
+      playerModels
+        .filter(model => model.id !== socket.id)
+        .forEach(opponentModel => {
+          const localOpponent = this.opponents.find(
+            p => p.id === opponentModel.id
+          );
+
+          if (localOpponent) {
+            localOpponent.applyRemoteState(opponentModel);
+          } else {
+            this.opponents.push(new Opponent(this, opponentModel));
+          }
+        });
+
+      this.opponents = this.opponents.filter(opponent => {
+        const opponentIncludedInRemoteState = playerModels.some(
+          m => m.id === opponent.id
         );
 
-        const localRemotePlayer = remotePlayers.find(
-          p => p.id === updatedRemotePlayer.id
-        );
-
-        const isSelf = updatedRemotePlayer.id === socket.id;
-        if (isSelf) return;
-
-        if (localRemotePlayer) {
-          localRemotePlayer.sprite.setPosition(
-            updatedRemotePlayer.x,
-            updatedRemotePlayer.y
-          );
-          localRemotePlayer.nameTag.setPosition(
-            updatedRemotePlayer.x,
-            updatedRemotePlayer.y - 40
-          );
-          remotePlayers = remotePlayers.map(p =>
-            p.id === updatedRemotePlayer.id
-              ? { ...p, ...updatedRemotePlayer }
-              : p
-          );
-          updateOpponentAnimation(localRemotePlayer);
-          updateOpponentEmitters(localRemotePlayer);
-        } else {
-          const emitter = new Emitter(this, updatedRemotePlayer.character);
-
-          const sprite = opponentsLayer.create(
-            updatedRemotePlayer.x,
-            updatedRemotePlayer.y,
-            updatedRemotePlayer.character.name,
-            0
-          );
-
-          emitter.follow(sprite);
-
-          const nameTag = this.add.text(0, 0, updatedRemotePlayer.name);
-          nameTag.setOrigin(0.5, 0.5);
-          sprite.setAlpha(0.6);
-
-          remotePlayers.push({
-            ...updatedRemotePlayer,
-            sprite,
-            nameTag,
-            emitter,
-          });
-        }
-      });
-
-      remotePlayers = remotePlayers.filter(remotePlayer => {
-        const playerIncludedInRemoteState = updatedRemotePlayers.some(
-          p => p.id === remotePlayer.id
-        );
-
-        if (playerIncludedInRemoteState) {
+        if (opponentIncludedInRemoteState) {
           return true;
         } else {
-          remotePlayer.sprite.destroy();
-          remotePlayer.nameTag.destroy();
+          opponent.destroy();
           return false;
         }
       });
@@ -214,7 +128,7 @@ export default class GameScene extends Phaser.Scene {
       const isSelf = finishedPlayer.id === socket.id;
       const sprite = isSelf
         ? player
-        : remotePlayers.find(p => p.id === finishedPlayer.id).sprite;
+        : this.opponents.find(p => p.id === finishedPlayer.id).sprite;
 
       this.tweens.add({
         targets: sprite,
