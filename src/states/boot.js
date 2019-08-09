@@ -1,4 +1,8 @@
-export const characters = ['human', 'robot', 'alien'];
+export const characters = [
+  { name: 'human', fire: true, smoke: true, smokeTint: 0xffffff },
+  { name: 'robot', fire: true, smoke: true, smokeTint: 0x555555 },
+  { name: 'alien', fire: false, smoke: true, smokeTint: 0xad73ea },
+];
 
 export default class BootScene extends Phaser.Scene {
   constructor() {
@@ -59,10 +63,10 @@ export default class BootScene extends Phaser.Scene {
   }
 
   create() {
-    characters.forEach(character => {
+    characters.forEach(({ name }) => {
       this.anims.create({
-        key: `${character}-walk-left`,
-        frames: this.anims.generateFrameNumbers(character, {
+        key: `${name}-walk-left`,
+        frames: this.anims.generateFrameNumbers(name, {
           start: 0,
           end: 7,
         }),
@@ -71,8 +75,8 @@ export default class BootScene extends Phaser.Scene {
       });
 
       this.anims.create({
-        key: `${character}-walk-right`,
-        frames: this.anims.generateFrameNumbers(character, {
+        key: `${name}-walk-right`,
+        frames: this.anims.generateFrameNumbers(name, {
           start: 8,
           end: 15,
         }),
@@ -81,38 +85,38 @@ export default class BootScene extends Phaser.Scene {
       });
 
       this.anims.create({
-        key: `${character}-stand-left`,
-        frames: [{ key: character, frame: 0 }],
+        key: `${name}-stand-left`,
+        frames: [{ key: name, frame: 0 }],
         frameRate: 20,
       });
 
       this.anims.create({
-        key: `${character}-stand-right`,
-        frames: [{ key: character, frame: 9 }],
+        key: `${name}-stand-right`,
+        frames: [{ key: name, frame: 9 }],
         frameRate: 20,
       });
 
       this.anims.create({
-        key: `${character}-flying-left`,
-        frames: [{ key: character, frame: 2 }],
+        key: `${name}-flying-left`,
+        frames: [{ key: name, frame: 18 }],
         frameRate: 20,
       });
 
       this.anims.create({
-        key: `${character}-flying-right`,
-        frames: [{ key: character, frame: 10 }],
+        key: `${name}-flying-right`,
+        frames: [{ key: name, frame: 19 }],
         frameRate: 20,
       });
 
       this.anims.create({
-        key: `${character}-rocketing-left`,
-        frames: [{ key: character, frame: 16 }],
+        key: `${name}-rocketing-left`,
+        frames: [{ key: name, frame: 16 }],
         frameRate: 20,
       });
 
       this.anims.create({
-        key: `${character}-rocketing-right`,
-        frames: [{ key: character, frame: 17 }],
+        key: `${name}-rocketing-right`,
+        frames: [{ key: name, frame: 17 }],
         frameRate: 5,
       });
     });

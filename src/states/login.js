@@ -31,7 +31,12 @@ export default class BootScene extends Phaser.Scene {
 
     characters.forEach((character, i) => {
       const x = charactersLeftStart + i * characterMargin;
-      const characterOption = this.add.sprite(x, height * 0.5, character, 0);
+      const characterOption = this.add.sprite(
+        x,
+        height * 0.5,
+        character.name,
+        0
+      );
       characterOption.setInteractive().on('pointerdown', () => {
         window.globalContext.character = character;
         characterOptions.forEach(option => {
