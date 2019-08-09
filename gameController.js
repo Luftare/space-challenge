@@ -1,7 +1,7 @@
 let players = [];
 
 const COUNTDOWN_START = 6;
-const LEVEL_COUNT = 6;
+const LEVEL_COUNT = 7;
 let countDownInterval = false;
 let countDown = COUNTDOWN_START;
 let levelIndex = Math.floor(Math.random() * LEVEL_COUNT);
