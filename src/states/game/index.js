@@ -6,7 +6,6 @@ import Opponent from './Opponent';
 import Player from './LocalPlayer';
 
 const GRAVITY = 300;
-const BOTTOM_MARGIN = 150;
 const GRID_SIZE = 60;
 const EMIT_UPDATE_DT = 20;
 
@@ -215,7 +214,7 @@ export default class GameScene extends Phaser.Scene {
       valign: 'center',
       halign: 'center',
       fixedWidth: width * 0.5,
-      fixedHeight: BOTTOM_MARGIN,
+      fixedHeight: 150,
       align: 'center',
     };
 
@@ -277,7 +276,7 @@ export default class GameScene extends Phaser.Scene {
         if (value === obstacleMap.r || value === obstacleMap.R) {
           rocket = this.physics.add.sprite(
             (gridX + 0.5) * GRID_SIZE,
-            -(gridY + 0.5) * GRID_SIZE - BOTTOM_MARGIN,
+            -(gridY + 0.5) * GRID_SIZE,
             'rocket',
             value === obstacleMap.r ? 0 : 4
           );
@@ -287,7 +286,7 @@ export default class GameScene extends Phaser.Scene {
         if (value === obstacleMap.s || value === obstacleMap.S) {
           this.spawnPoint = {
             x: (gridX + 0.5) * GRID_SIZE,
-            y: -(gridY + 0.5) * GRID_SIZE - BOTTOM_MARGIN,
+            y: -(gridY + 0.5) * GRID_SIZE,
             direction: value === obstacleMap.s ? -1 : 1,
           };
           return;
@@ -296,7 +295,7 @@ export default class GameScene extends Phaser.Scene {
         platforms
           .create(
             (gridX + 0.5) * GRID_SIZE,
-            Math.round(-(gridY + 0.5) * GRID_SIZE - BOTTOM_MARGIN),
+            Math.round(-(gridY + 0.5) * GRID_SIZE),
             'tiles',
             value
           )
