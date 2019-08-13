@@ -144,6 +144,15 @@ export default class GameScene extends Phaser.Scene {
       .setVisible(false)
       .setOrigin(0.5, 0.5)
       .setScrollFactor(0);
+
+    this.fuelBar = new Phaser.Geom.Rectangle(0, 0, width, 4);
+    this.fuelBarGraphics = this.add.graphics({
+      x: 0,
+      y: 0,
+      fillStyle: { color: 0xbbbb00 },
+    });
+    this.fuelBarGraphics.fillRectShape(this.fuelBar);
+    this.fuelBarGraphics.setScrollFactor(0);
   }
 
   flashMessage(text) {
@@ -213,6 +222,7 @@ export default class GameScene extends Phaser.Scene {
     this.updateCamera();
     this.player.update();
     this.connection.emitUpdate();
+    this.fuelBarGraphics.setScale(this.player.getRelativeFuel(), 1);
   }
 
   updateCamera() {

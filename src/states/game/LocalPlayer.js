@@ -4,7 +4,7 @@ const PLAYER_VELOCITY = 100;
 const PLAYER_JUMP_VELOCITY = 300;
 const PLAYER_ROCKET_ACCELERATION_X = 200;
 const PLAYER_ROCKET_ACCELERATION_Y = 600;
-const MAX_PLAYER_FUEL = 50;
+export const MAX_PLAYER_FUEL = 50;
 
 export default class LocalPlayer extends Player {
   constructor(game, character) {
@@ -142,12 +142,16 @@ export default class LocalPlayer extends Player {
       this.emitter.stop();
     }
 
-    if (this.sprite.body.blocked.down) {
+    if (this.sprite.body.blocked.down && !this.inBlackHole) {
       this.fuel = MAX_PLAYER_FUEL;
     }
   }
 
   getTotalTime() {
     return Date.now() - this.startTime;
+  }
+
+  getRelativeFuel() {
+    return this.fuel / MAX_PLAYER_FUEL;
   }
 }
