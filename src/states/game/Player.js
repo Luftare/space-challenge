@@ -65,7 +65,7 @@ export default class Player {
     this.game.tweens.add({
       targets: this.sprite,
       scale: 0,
-      duration: 300,
+      duration: 400,
       repeat: 0,
       x,
       y,

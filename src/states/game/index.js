@@ -113,9 +113,23 @@ export default class GameScene extends Phaser.Scene {
       this.blackHoles,
       (playerSprite, blackHole) => {
         if (this.player.failed) return;
+        this.player.inBlackHole = true;
         this.player.fail();
         this.player.shrinkTo(blackHole.x, blackHole.y);
         this.connection.handlePlayerHitBlackHole(blackHole.x, blackHole.y);
+
+        this.add.tween({
+          targets: this.player.sprite,
+          rotation: -Math.PI * 2,
+          duration: 400,
+        });
+
+        this.add.tween({
+          targets: blackHole,
+          scale: 2,
+          duration: 150,
+          yoyo: true,
+        });
       }
     );
 

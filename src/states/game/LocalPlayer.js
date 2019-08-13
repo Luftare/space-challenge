@@ -15,6 +15,7 @@ export default class LocalPlayer extends Player {
     this.finished = false;
     this.fuel = 0;
     this.failed = false;
+    this.inBlackHole = false;
 
     this.sprite.setSize(30, 54);
     this.sprite.setOffset(0.5, 0.5);
@@ -41,7 +42,7 @@ export default class LocalPlayer extends Player {
   updateMovement() {
     const blocked = this.sprite.body.blocked;
 
-    if (this.finished) {
+    if (this.finished || this.inBlackHole) {
       this.sprite.setVelocity(0, 0);
       return;
     }
@@ -63,7 +64,7 @@ export default class LocalPlayer extends Player {
 
     setTimeout(() => {
       this.respawn(this.game.spawnPoint);
-    }, 500);
+    }, 1000);
   }
 
   handleFailing() {
@@ -87,6 +88,7 @@ export default class LocalPlayer extends Player {
 
   respawn(spawnPoint) {
     this.failed = false;
+    this.inBlackHole = false;
     this.sprite.setScale(1, 1);
     this.finished = false;
     this.sprite.setPosition(spawnPoint.x, spawnPoint.y, 0, 0);
