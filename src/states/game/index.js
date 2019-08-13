@@ -111,7 +111,14 @@ export default class GameScene extends Phaser.Scene {
     this.GUIMessage = this.add
       .text(width * 0.5, 100, 0, {
         fontSize: 60,
-        color: 'orange',
+        color: 'yellow',
+        shadow: {
+          offsetX: 3,
+          offsetY: 4,
+          color: 'black',
+          blur: 0,
+          fill: true,
+        },
       })
       .setVisible(false)
       .setOrigin(0.5, 0.5)

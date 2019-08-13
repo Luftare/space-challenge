@@ -48,6 +48,16 @@ export default class GameScene extends Phaser.Scene {
           })
           .setOrigin(0, 0.5);
 
+        if (player.lastScore > 0) {
+          const x = width - 50;
+          this.add
+            .text(x, y, `+${player.lastScore}`, {
+              fontSize: 30,
+              color: 'yellow',
+            })
+            .setOrigin(1, 0.5);
+        }
+
         const characterName = characters[player.characterIndex].name;
 
         this.add

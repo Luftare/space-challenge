@@ -41,6 +41,7 @@ function generatePlayer(id, name, characterIndex) {
     finished: false,
     totalTime: 0,
     totalScore: 0,
+    lastScore: 0,
     d: 1,
     r: false,
     f: false,
@@ -85,6 +86,7 @@ function handleGameOver() {
     .sort((a, b) => a.totalTime - b.totalTime)
     .forEach((player, position) => {
       const receivedScore = Math.max(0, 100 - position * 35);
+      player.lastScore = receivedScore;
       player.totalScore += receivedScore;
     });
 
@@ -97,6 +99,7 @@ function handleGameOver() {
     players.forEach(player => {
       player.totalTime = 0;
       player.finished = false;
+      player.lastScore = 0;
     });
     levelIndex = getLevelIndex();
     io.sockets.emit('PREPARE_LEVEL', { levelIndex });
