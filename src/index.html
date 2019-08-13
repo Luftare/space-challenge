@@ -69,11 +69,15 @@
       border: none;
       font-size: 36px;
     }
+
+    #submit:disabled {
+      opacity: 0.5;
+    }
   </style>
 
   <div id="login">
     <input id="name" placeholder="Name" />
-    <button id="submit">Next</button>
+    <button id="submit" disabled>Next</button>
   </div>
   <div id="game-root" hidden></div>
   <div id="rotate-device">Rotate 🤪</div>

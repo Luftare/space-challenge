@@ -67,9 +67,18 @@ if (module.hot) {
 const shouldCreateGame =
   !mobile || (mobile && window.innerWidth < window.innerHeight);
 
+function validateName(name) {
+  return name.length > 1 && name.length < 14;
+}
+
+document.getElementById('name').addEventListener('input', e => {
+  const validName = validateName(e.target.value);
+  document.getElementById('submit').disabled = !validName;
+});
+
 document.getElementById('submit').addEventListener('click', () => {
   const name = document.getElementById('name').value;
-  const validName = name.length > 1 && name.length < 14;
+  const validName = validateName(name);
 
   if (validName) {
     window.globalContext = {
