@@ -72,4 +72,12 @@ export default class Player {
       onComplete,
     });
   }
+
+  spinOnce() {
+    this.game.add.tween({
+      targets: this.sprite,
+      rotation: -Math.PI * 2,
+      duration: 400,
+    });
+  }
 }

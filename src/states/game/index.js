@@ -118,11 +118,7 @@ export default class GameScene extends Phaser.Scene {
         this.player.shrinkTo(blackHole.x, blackHole.y);
         this.connection.handlePlayerHitBlackHole(blackHole.x, blackHole.y);
 
-        this.add.tween({
-          targets: this.player.sprite,
-          rotation: -Math.PI * 2,
-          duration: 400,
-        });
+        this.player.spinOnce();
 
         this.add.tween({
           targets: blackHole,

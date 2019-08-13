@@ -18,6 +18,8 @@ const initGame = _io => {
   io.sockets.on('connection', socket => {
     socket.on('disconnect', () => {
       players = players.filter(player => player.id !== socket.id);
+
+      console.log('DISCONNECT:', socket.id);
     });
 
     socket.on('PLAYER_UPDATE', state => {

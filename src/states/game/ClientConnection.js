@@ -54,6 +54,7 @@ export default class ClientConnection {
       const opponent = this.opponents.find(o => o.id === id);
       if (!opponent) return;
       opponent.shrinkTo(x, y);
+      opponent.spinOnce();
     });
 
     socket.on('PLAYER_REACH_GOAL', finishedPlayer => {
