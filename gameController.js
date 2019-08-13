@@ -5,7 +5,8 @@ const LEVEL_COUNT = 7;
 let countDownInterval = false;
 let gameOverTimeout = false;
 let countDown = COUNTDOWN_START;
-let levelIndex = getLevelIndex();
+let levelIndex = 0;
+let lastLevelIndex = levelIndex;
 let io;
 
 const initGame = _io => {
@@ -101,13 +102,18 @@ function handleGameOver() {
       player.finished = false;
       player.lastScore = 0;
     });
-    levelIndex = getLevelIndex();
+    levelIndex = generateNewLevelIndex();
     io.sockets.emit('PREPARE_LEVEL', { levelIndex });
   }, 8000);
 }
 
-function getLevelIndex() {
-  return Math.floor(Math.random() * LEVEL_COUNT);
+function generateNewLevelIndex() {
+  let newLevelIndex = levelIndex;
+
+  while (newLevelIndex === levelIndex) {
+    newLevelIndex = Math.floor(Math.random() * LEVEL_COUNT);
+  }
+  return newLevelIndex;
 }
 
 module.exports = { initGame };
