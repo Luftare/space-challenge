@@ -50,6 +50,11 @@ export default class ClientConnection {
       this.game.flashMessage(text);
     });
 
+    socket.on('OPPONENT_HIT_BLACK_HOLE', ({ id, x, y }) => {
+      const opponent = this.opponents.find(o => o.id === id);
+      opponent.shrinkTo(x, y);
+    });
+
     socket.on('PLAYER_REACH_GOAL', finishedPlayer => {
       const isSelf = finishedPlayer.id === socket.id;
       const target = isSelf
@@ -74,6 +79,10 @@ export default class ClientConnection {
 
   handlePlayerReachGoal(totalTime) {
     this.socket.emit('PLAYER_REACH_GOAL', { totalTime });
+  }
+
+  handlePlayerHitBlackHole(x, y) {
+    this.socket.emit('PLAYER_HIT_BLACK_HOLE', { x, y });
   }
 
   emitUpdate(extraProperties = {}) {

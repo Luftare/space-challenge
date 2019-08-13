@@ -33,6 +33,10 @@ const initGame = _io => {
       handlePlayerReachGoal(socket.id, totalTime);
     });
 
+    socket.on('PLAYER_HIT_BLACK_HOLE', ({ x, y }) => {
+      socket.broadcast.emit('OPPONENT_HIT_BLACK_HOLE', { x, y, id: socket.id });
+    });
+
     socket.emit('NEW_GAME', { levelIndex });
   });
 };
@@ -108,6 +112,7 @@ function handleGameOver() {
 }
 
 function generateNewLevelIndex() {
+  return levelIndex;
   let newLevelIndex = levelIndex;
 
   while (newLevelIndex === levelIndex) {

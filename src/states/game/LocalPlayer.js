@@ -58,16 +58,20 @@ export default class LocalPlayer extends Player {
     }
   }
 
+  fail() {
+    this.failed = true;
+
+    setTimeout(() => {
+      this.respawn(this.game.spawnPoint);
+    }, 500);
+  }
+
   handleFailing() {
     if (this.failed) return;
     const didFail = this.sprite.body.bottom >= 0;
 
     if (didFail) {
-      this.failed = true;
-
-      setTimeout(() => {
-        this.respawn(this.game.spawnPoint);
-      }, 500);
+      this.fail();
     }
   }
 

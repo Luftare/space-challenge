@@ -27,6 +27,10 @@ export default class Opponent extends Player {
     this.flying = state.f;
     this.rocketing = state.r;
     this.spawning = state.s;
+
+    if (this.spawning) {
+      this.sprite.setScale(1, 1);
+    }
   }
 
   updatePosition(state) {

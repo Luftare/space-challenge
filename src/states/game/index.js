@@ -12,7 +12,6 @@ const GRID_SIZE = 60;
 
 let level;
 let background;
-let platforms;
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -44,7 +43,8 @@ export default class GameScene extends Phaser.Scene {
       'background'
     );
 
-    platforms = this.physics.add.staticGroup();
+    this.platforms = this.physics.add.staticGroup();
+    this.blackHoles = this.physics.add.staticGroup();
 
     this.decodeLevel(this.level);
 
@@ -96,7 +96,7 @@ export default class GameScene extends Phaser.Scene {
       this.handleRightInputUp();
     });
 
-    this.physics.add.collider(this.player.sprite, platforms);
+    this.physics.add.collider(this.player.sprite, this.platforms);
 
     this.physics.add.overlap(this.player.sprite, this.rocket.sprite, () => {
       if (this.player.sprite.body.blocked.down) {
@@ -107,6 +107,17 @@ export default class GameScene extends Phaser.Scene {
         }
       }
     });
+
+    this.physics.add.overlap(
+      this.player.sprite,
+      this.blackHoles,
+      (playerSprite, blackHole) => {
+        if (this.player.failed) return;
+        this.player.fail();
+        this.player.shrinkTo(blackHole.x, blackHole.y);
+        this.connection.handlePlayerHitBlackHole(blackHole.x, blackHole.y);
+      }
+    );
 
     this.GUIMessage = this.add
       .text(width * 0.5, 100, 0, {
@@ -172,7 +183,12 @@ export default class GameScene extends Phaser.Scene {
           return;
         }
 
-        platforms.create(x, y, 'tiles', value).refreshBody();
+        if (value === obstacleMap.b) {
+          this.blackHoles.create(x, y, 'items', 2);
+          return;
+        }
+
+        this.platforms.create(x, y, 'tiles', value).refreshBody();
       });
     });
   }

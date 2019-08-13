@@ -39,6 +39,11 @@ export default class BootScene extends Phaser.Scene {
       frameHeight: 60,
     });
 
+    this.load.spritesheet('items', require('../assets/items.png'), {
+      frameWidth: 60,
+      frameHeight: 60,
+    });
+
     this.load.image('background', require('../assets/background.png'));
 
     this.load.image(
