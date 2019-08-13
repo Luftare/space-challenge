@@ -45,6 +45,7 @@ export default class GameScene extends Phaser.Scene {
 
     this.platforms = this.physics.add.staticGroup();
     this.blackHoles = this.physics.add.staticGroup();
+    this.fuelResupplies = this.physics.add.staticGroup();
 
     this.decodeLevel(this.level);
 
@@ -112,7 +113,7 @@ export default class GameScene extends Phaser.Scene {
       this.player.sprite,
       this.blackHoles,
       (playerSprite, blackHole) => {
-        if (this.player.failed) return;
+        if (this.player.inBlackHole) return;
         this.player.inBlackHole = true;
         this.player.fail();
         this.player.shrinkTo(blackHole.x, blackHole.y);
@@ -123,9 +124,37 @@ export default class GameScene extends Phaser.Scene {
         this.add.tween({
           targets: blackHole,
           scale: 2,
-          duration: 150,
+          duration: 100,
           yoyo: true,
         });
+      }
+    );
+
+    this.physics.add.overlap(
+      this.player.sprite,
+      this.fuelResupplies,
+      (_, fuelResupply) => {
+        if (fuelResupply.canSupplyFuel) {
+          fuelResupply.canSupplyFuel = false;
+          this.player.setMaxFuel();
+
+          this.add.tween({
+            targets: fuelResupply,
+            scale: 0,
+            duration: 200,
+          });
+
+          setTimeout(() => {
+            this.add.tween({
+              targets: fuelResupply,
+              scale: 1,
+              duration: 200,
+              onComplete: () => {
+                fuelResupply.canSupplyFuel = true;
+              },
+            });
+          }, 4000);
+        }
       }
     );
 
@@ -210,6 +239,13 @@ export default class GameScene extends Phaser.Scene {
             duration: Phaser.Math.FloatBetween(800, 1000),
             repeat: -1,
           });
+          return;
+        }
+
+        if (value === obstacleMap.f) {
+          const fuelResupply = this.fuelResupplies.create(x, y, 'items', 0);
+          fuelResupply.body.checkCollision.up = false; // this will disable 'walking' on fuel tank
+          fuelResupply.canSupplyFuel = true;
           return;
         }
 

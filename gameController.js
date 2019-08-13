@@ -114,7 +114,6 @@ function handleGameOver() {
 }
 
 function generateNewLevelIndex() {
-  return levelIndex;
   let newLevelIndex = levelIndex;
 
   while (newLevelIndex === levelIndex) {

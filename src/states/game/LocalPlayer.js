@@ -154,4 +154,8 @@ export default class LocalPlayer extends Player {
   getRelativeFuel() {
     return this.fuel / MAX_PLAYER_FUEL;
   }
+
+  setMaxFuel() {
+    this.fuel = MAX_PLAYER_FUEL;
+  }
 }
