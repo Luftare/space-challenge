@@ -12,8 +12,6 @@ const initGame = io => {
   }, 30);
 
   io.sockets.on('connection', socket => {
-    let player = {};
-
     socket.on('disconnect', () => {
       players = players.filter(player => player.id !== socket.id);
     });
