@@ -230,17 +230,27 @@ export default class GameScene extends Phaser.Scene {
       .setScrollFactor(0);
 
     leftButton.setInteractive().on('pointerdown', () => {
-      if (this.player.spawning) return;
-      this.player.direction *= -1;
+      this.handleLeftInputDown();
     });
 
     rightButton.setInteractive().on('pointerdown', () => {
-      if (this.player.spawning) return;
-      this.player.requestJump();
+      this.handleRightInputDown();
     });
 
     rightButton.setInteractive().on('pointerup', () => {
-      this.player.rocketing = false;
+      this.handleRightInputUp();
+    });
+
+    this.input.keyboard.on('keydown-O', () => {
+      this.handleLeftInputDown();
+    });
+
+    this.input.keyboard.on('keydown-P', () => {
+      this.handleRightInputDown();
+    });
+
+    this.input.keyboard.on('keyup-P', () => {
+      this.handleRightInputUp();
     });
 
     this.physics.add.collider(this.player.sprite, platforms);
@@ -267,6 +277,20 @@ export default class GameScene extends Phaser.Scene {
     countDownText.setVisible(false);
     countDownText.setOrigin(0.5, 0.5);
     countDownText.setScrollFactor(0);
+  }
+
+  handleLeftInputDown() {
+    if (this.player.spawning) return;
+    this.player.direction *= -1;
+  }
+
+  handleRightInputDown() {
+    if (this.player.spawning) return;
+    this.player.requestJump();
+  }
+
+  handleRightInputUp() {
+    this.player.rocketing = false;
   }
 
   decodeLevel(level) {
