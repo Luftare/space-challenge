@@ -1,8 +1,9 @@
 import Player from './Player';
+import { characters } from '../boot';
 
 export default class Opponent extends Player {
   constructor(game, model) {
-    super(game, model.character);
+    super(game, characters[model.characterIndex]);
     this.nameTag = game.add.text(0, 0, model.name);
     this.nameTag.setOrigin(0.5, 0.5);
     this.sprite.setAlpha(0.6);

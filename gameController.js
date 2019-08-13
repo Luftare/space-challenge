@@ -3,10 +3,13 @@ let players = [];
 const COUNTDOWN_START = 6;
 const LEVEL_COUNT = 7;
 let countDownInterval = false;
+let gameOverTimeout = false;
 let countDown = COUNTDOWN_START;
-let levelIndex = Math.floor(Math.random() * LEVEL_COUNT);
+let levelIndex = getLevelIndex();
+let io;
 
-const initGame = io => {
+const initGame = _io => {
+  io = _io;
   setInterval(() => {
     io.sockets.emit('STATE_UPDATE', players);
   }, 30);
@@ -20,75 +23,88 @@ const initGame = io => {
       players = players.map(p => (p.id === socket.id ? { ...p, ...state } : p));
     });
 
-    socket.on('LOGIN', data => {
-      const player = {
-        id: socket.id,
-        character: 'human',
-        finished: false,
-        totalTime: 0,
-        totalScore: 0,
-        name: '',
-        d: 1,
-        r: false,
-        f: false,
-        x: 0,
-        y: 0,
-        ...data,
-      };
-
-      players.push(player);
+    socket.on('LOGIN', ({ name, characterIndex }) => {
+      players.push(generatePlayer(socket.id, name, characterIndex));
       socket.emit('JOIN_GAME', { levelIndex });
     });
 
     socket.on('PLAYER_REACH_GOAL', ({ totalTime }) => {
-      const player = players.find(p => p.id === socket.id);
-      if (!player) return;
-      player.totalTime = totalTime;
-      player.finished = true;
-
-      io.sockets.emit('PLAYER_REACH_GOAL', player);
-
-      const countDownActive = countDownInterval !== false;
-
-      if (countDownActive) {
-        return;
-      }
-
-      countDownInterval = setInterval(() => {
-        countDown--;
-
-        io.sockets.emit('COUNTDOWN', countDown);
-
-        if (countDown <= 0) {
-          clearInterval(countDownInterval);
-
-          players
-            .filter(player => player.finished)
-            .sort((a, b) => a.totalTime - b.totalTime)
-            .forEach((player, position) => {
-              const receivedScore = Math.max(0, 100 - position * 35);
-              player.totalScore += receivedScore;
-            });
-
-          io.sockets.emit('GAME_OVER', players);
-
-          setTimeout(() => {
-            console.log('NEW GAME!');
-            countDownInterval = false;
-            countDown = COUNTDOWN_START;
-            players.forEach(player => {
-              player.totalTime = 0;
-              player.finished = false;
-            });
-            levelIndex = Math.floor(Math.random() * LEVEL_COUNT);
-            io.sockets.emit('PREPARE_LEVEL', { levelIndex });
-          }, 8000);
-        }
-      }, 1000);
+      handlePlayerReachGoal(socket.id, totalTime);
     });
 
     socket.emit('NEW_GAME', { levelIndex });
   });
 };
+
+function generatePlayer(id, name, characterIndex) {
+  return {
+    finished: false,
+    totalTime: 0,
+    totalScore: 0,
+    d: 1,
+    r: false,
+    f: false,
+    x: 0,
+    y: 0,
+    id,
+    name,
+    characterIndex,
+  };
+}
+
+function handlePlayerReachGoal(id, totalTime) {
+  const player = players.find(p => p.id === id);
+  if (!player) return;
+  player.totalTime = totalTime;
+  player.finished = true;
+
+  io.sockets.emit('PLAYER_REACH_GOAL', player);
+
+  const countDownActive = countDownInterval !== false;
+
+  if (countDownActive) {
+    return;
+  }
+
+  countDownInterval = setInterval(() => {
+    countDown--;
+
+    io.sockets.emit('COUNTDOWN', countDown);
+
+    if (countDown <= 0) {
+      handleGameOver();
+    }
+  }, 1000);
+}
+
+function handleGameOver() {
+  clearInterval(countDownInterval || 0);
+
+  players
+    .filter(player => player.finished)
+    .sort((a, b) => a.totalTime - b.totalTime)
+    .forEach((player, position) => {
+      const receivedScore = Math.max(0, 100 - position * 35);
+      player.totalScore += receivedScore;
+    });
+
+  io.sockets.emit('GAME_OVER', players);
+
+  setTimeout(() => {
+    console.log('NEW GAME!');
+    countDownInterval = false;
+    countDown = COUNTDOWN_START;
+    players.forEach(player => {
+      player.totalTime = 0;
+      player.finished = false;
+    });
+    levelIndex = getLevelIndex();
+    io.sockets.emit('PREPARE_LEVEL', { levelIndex });
+  }, 8000);
+}
+
+function getLevelIndex() {
+  return Math.floor(Math.random() * LEVEL_COUNT);
+}
 
 module.exports = { initGame };

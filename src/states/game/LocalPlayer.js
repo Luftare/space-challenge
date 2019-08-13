@@ -140,4 +140,8 @@ export default class LocalPlayer extends Player {
       this.fuel = MAX_PLAYER_FUEL;
     }
   }
+
+  getTotalTime() {
+    return Date.now() - this.startTime;
+  }
 }

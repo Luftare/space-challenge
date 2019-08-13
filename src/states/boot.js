@@ -14,10 +14,12 @@ export default class BootScene extends Phaser.Scene {
       frameWidth: 40,
       frameHeight: 55,
     });
+
     this.load.spritesheet('robot', require(`../assets/robot.png`), {
       frameWidth: 40,
       frameHeight: 55,
     });
+
     this.load.spritesheet('alien', require(`../assets/alien.png`), {
       frameWidth: 40,
       frameHeight: 55,
@@ -31,19 +33,24 @@ export default class BootScene extends Phaser.Scene {
       frameWidth: 60,
       frameHeight: 60,
     });
+
     this.load.spritesheet('tiles', require('../assets/tiles.png'), {
       frameWidth: 60,
       frameHeight: 60,
     });
+
     this.load.image('background', require('../assets/background.png'));
+
     this.load.image(
       'jump-rocket-button',
       require('../assets/jumpRocketButton.png')
     );
+
     this.load.image(
       'toggle-direction-button',
       require('../assets/toggleDirectionButton.png')
     );
+
     this.load.image('smoke', require('../assets/smoke.png'));
     this.load.image('fire', require('../assets/fire.png'));
 

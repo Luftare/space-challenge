@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { characters } from './boot';
 
 let socket;
 let playerScores;
@@ -47,8 +48,10 @@ export default class GameScene extends Phaser.Scene {
           })
           .setOrigin(0, 0.5);
 
+        const characterName = characters[player.characterIndex].name;
+
         this.add
-          .sprite(x, y, player.character.name, 0)
+          .sprite(x, y, characterName, 0)
           .setOrigin(0.5, 0.5)
           .setScale(0.8);
       });

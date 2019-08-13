@@ -60,4 +60,16 @@ export default class Player {
       this.emitter.stop();
     }
   }
+
+  shrinkTo(x, y, onComplete) {
+    this.game.tweens.add({
+      targets: this.sprite,
+      scale: 0,
+      duration: 300,
+      repeat: 0,
+      x,
+      y,
+      onComplete,
+    });
+  }
 }
