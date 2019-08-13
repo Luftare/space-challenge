@@ -184,7 +184,13 @@ export default class GameScene extends Phaser.Scene {
         }
 
         if (value === obstacleMap.b) {
-          this.blackHoles.create(x, y, 'items', 2);
+          const blackHole = this.blackHoles.create(x, y, 'items', 2);
+          this.add.tween({
+            targets: blackHole,
+            rotation: -Math.PI * 2,
+            duration: Phaser.Math.FloatBetween(800, 1000),
+            repeat: -1,
+          });
           return;
         }
 

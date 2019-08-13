@@ -52,6 +52,7 @@ export default class ClientConnection {
 
     socket.on('OPPONENT_HIT_BLACK_HOLE', ({ id, x, y }) => {
       const opponent = this.opponents.find(o => o.id === id);
+      if (!opponent) return;
       opponent.shrinkTo(x, y);
     });
 
