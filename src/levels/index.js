@@ -8,6 +8,7 @@ import level6 from './level-6';
 import level7 from './level-7';
 import level8 from './level-8';
 import level9 from './level-9';
+import level10 from './level-10';
 
 export default [
   level0,
@@ -20,4 +21,5 @@ export default [
   level7,
   level8,
   level9,
+  level10,
 ];
