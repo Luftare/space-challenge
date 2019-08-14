@@ -12,6 +12,10 @@ import level10 from './level-10';
 import level11 from './level-11';
 import level12 from './level-12';
 import level13 from './level-13';
+import level14 from './level-14';
+import level15 from './level-15';
+import level16 from './level-16';
+import level17 from './level-17';
 
 export default [
   level0,
@@ -28,4 +32,8 @@ export default [
   level11,
   level12,
   level13,
+  level14,
+  level15,
+  level16,
+  level17,
 ];

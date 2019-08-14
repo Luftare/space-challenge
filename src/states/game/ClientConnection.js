@@ -95,15 +95,11 @@ export default class ClientConnection {
       );
     });
 
-    socket.on('NEW_GAME', ({ levelIndex }) => {
+    socket.on('JOIN_GAME', ({ levelIndex }) => {
       this.game.scene.start('game', { levelIndex });
     });
 
     socket.on('PREPARE_LEVEL', ({ levelIndex }) => {
-      this.game.scene.start('game', { levelIndex });
-    });
-
-    socket.on('JOIN_GAME', ({ levelIndex }) => {
       this.game.scene.start('game', { levelIndex });
     });
 
