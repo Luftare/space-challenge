@@ -62,7 +62,7 @@ export default class GameScene extends Phaser.Scene {
       align: 'center',
     };
 
-    this.add
+    this.leftButton = this.add
       .sprite(0, height, 'toggle-direction-button')
       .setOrigin(0, 1)
       .setDepth(10)
@@ -70,9 +70,13 @@ export default class GameScene extends Phaser.Scene {
       .setInteractive()
       .on('pointerdown', () => {
         this.handleLeftInputDown();
+        this.leftButton.setTint(0x999999);
+      })
+      .on('pointerup', () => {
+        this.leftButton.setTint(0xffffff);
       });
 
-    this.add
+    this.rightButton = this.add
       .sprite(width * 0.5, height, 'jump-rocket-button')
       .setOrigin(0, 1)
       .setDepth(10)
@@ -80,9 +84,11 @@ export default class GameScene extends Phaser.Scene {
       .setInteractive()
       .on('pointerdown', () => {
         this.handleRightInputDown();
+        this.rightButton.setTint(0x999999);
       })
       .on('pointerup', () => {
         this.handleRightInputUp();
+        this.rightButton.setTint(0xffffff);
       });
 
     this.input.keyboard.on('keydown-O', () => {
@@ -178,11 +184,11 @@ export default class GameScene extends Phaser.Scene {
       .setOrigin(0.5, 0.5)
       .setScrollFactor(0);
 
-    this.fuelBar = new Phaser.Geom.Rectangle(0, 0, width, 4);
+    this.fuelBar = new Phaser.Geom.Rectangle(0, 0, width, 8);
     this.fuelBarGraphics = this.add.graphics({
       x: 0,
       y: 0,
-      fillStyle: { color: 0xbbbb00 },
+      fillStyle: { color: 0xeeee00 },
     });
     this.fuelBarGraphics.fillRectShape(this.fuelBar);
     this.fuelBarGraphics.setScrollFactor(0);
