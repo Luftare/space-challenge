@@ -5,7 +5,7 @@ const LEVEL_COUNT = 7;
 let countDownInterval = false;
 let gameOverTimeout = false;
 let countDown = COUNTDOWN_START;
-let levelIndex = 0;
+let levelIndex = 8;
 let lastLevelIndex = levelIndex;
 let io;
 

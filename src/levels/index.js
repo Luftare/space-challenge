@@ -6,5 +6,18 @@ import level4 from './level-4';
 import level5 from './level-5';
 import level6 from './level-6';
 import level7 from './level-7';
+import level8 from './level-8';
+import level9 from './level-9';
 
-export default [level0, level1, level2, level3, level4, level5, level6, level7];
+export default [
+  level0,
+  level1,
+  level2,
+  level3,
+  level4,
+  level5,
+  level6,
+  level7,
+  level8,
+  level9,
+];

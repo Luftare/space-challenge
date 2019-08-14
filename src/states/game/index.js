@@ -246,6 +246,14 @@ export default class GameScene extends Phaser.Scene {
           const fuelResupply = this.fuelResupplies.create(x, y, 'items', 0);
           fuelResupply.body.checkCollision.up = false; // this will disable 'walking' on fuel tank
           fuelResupply.canSupplyFuel = true;
+
+          this.add.tween({
+            targets: fuelResupply,
+            y: '-=6',
+            duration: 300,
+            repeat: -1,
+            yoyo: true,
+          });
           return;
         }
 
