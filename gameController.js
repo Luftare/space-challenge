@@ -1,7 +1,7 @@
 let players = [];
 
 const COUNTDOWN_START = 6;
-const LEVEL_COUNT = 22;
+const LEVEL_COUNT = 23;
 let countDownInterval = false;
 let gameOverTimeout = false;
 let countDown = COUNTDOWN_START;
