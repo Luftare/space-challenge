@@ -23,8 +23,8 @@ export default class GameScene extends Phaser.Scene {
           gravity: { y: GRAVITY },
           debug: false,
         },
-        input: { activePointers: 3 },
       },
+      input: { activePointers: 3 },
     });
   }
 
