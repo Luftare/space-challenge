@@ -163,7 +163,13 @@ export default class BootScene extends Phaser.Scene {
       yoyo: true,
     });
 
-    this.scene.start('login');
+    if (window.globalContext.levelEditMode) {
+      const levelIndex =
+        parseInt(new URLSearchParams(window.location.search).get('level')) || 0;
+      this.scene.start('game', { levelIndex });
+    } else {
+      this.scene.start('login');
+    }
   }
 
   update() {}

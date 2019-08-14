@@ -104,7 +104,11 @@ export default class GameScene extends Phaser.Scene {
         if (!this.player.finished) {
           this.player.finished = true;
           const totalTime = this.player.getTotalTime();
-          this.connection.handlePlayerReachGoal(totalTime);
+          if (window.globalContext.levelEditMode) {
+            this.player.respawn(this.spawnPoint);
+          } else {
+            this.connection.handlePlayerReachGoal(totalTime);
+          }
         }
       }
     });

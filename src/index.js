@@ -1,9 +1,11 @@
 import Phaser from 'phaser';
-import BootState from './states/boot';
+import BootState, { characters } from './states/boot';
 import GameState from './states/game';
 import ScoreState from './states/score';
 import LoginState from './states/login';
 import { isMobileDevice } from './utils';
+
+const levelEditMode = process.env.NODE_ENV === 'level_edit';
 
 const mobile = isMobileDevice();
 
@@ -82,6 +84,7 @@ document.getElementById('submit').addEventListener('click', () => {
 
   if (validName) {
     window.globalContext = {
+      levelEditMode,
       socket: null,
       name,
       character: {},
@@ -94,3 +97,20 @@ document.getElementById('submit').addEventListener('click', () => {
     }, 500);
   }
 });
+
+if (levelEditMode) {
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('game-root').hidden = false;
+
+  window.globalContext = {
+    levelEditMode,
+    socket: {
+      on: () => {},
+      emit: () => {},
+      removeAllListeners: () => {},
+    },
+    name: 'tester',
+    character: characters[0],
+  };
+  newGame();
+}
