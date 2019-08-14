@@ -254,7 +254,7 @@ export default class GameScene extends Phaser.Scene {
           this.add.tween({
             targets: fuelResupply,
             y: '-=6',
-            duration: 300,
+            duration: Phaser.Math.FloatBetween(200, 400),
             repeat: -1,
             yoyo: true,
           });
