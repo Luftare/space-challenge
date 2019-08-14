@@ -1,14 +1,14 @@
 let players = [];
 
 const COUNTDOWN_START = 6;
-const LEVEL_COUNT = 25;
+const LEVEL_COUNT = 27;
 let countDownInterval = false;
 let gameOverTimeout = false;
 let countDown = COUNTDOWN_START;
 let levelIndex = 0;
 let lastLevelIndex = levelIndex;
 let levelsBuffer = [levelIndex];
-const LEVELS_BUFFER_LENGTH = Math.floor(LEVEL_COUNT * 0.5);
+const LEVELS_BUFFER_LENGTH = Math.floor(LEVEL_COUNT * 0.7);
 let io;
 
 const initGame = _io => {
