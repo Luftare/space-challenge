@@ -19,7 +19,7 @@ export default class LocalPlayer extends Player {
 
     this.sprite.setSize(30, 54);
     this.sprite.setOffset(0.5, 0.5);
-    this.sprite.setBounce(0.0);
+    this.sprite.setBounceX(0.2);
     this.sprite.setDepth(3);
     this.sprite.setCollideWorldBounds(false);
   }

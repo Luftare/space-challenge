@@ -15,7 +15,6 @@ export default class Player {
     } else {
       this.sprite = this.game.add.sprite(0, 0, character.name, 0);
     }
-
     this.emitter.follow(this.sprite);
   }
 
