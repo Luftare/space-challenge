@@ -1,6 +1,7 @@
 export default class Rocket {
   constructor(game, x, y, direction) {
     this.game = game;
+    this.direction = direction;
 
     this.smokeEmitter = game.add.particles('smoke').createEmitter({
       x: { min: -10, max: 10 },

@@ -22,6 +22,7 @@ import level20 from './level-20';
 import level21 from './level-21';
 import level22 from './level-22';
 import level23 from './level-23';
+import level24 from './level-24';
 
 module.exports = [
   level0,
@@ -48,4 +49,5 @@ module.exports = [
   level21,
   level22,
   level23,
+  level24,
 ];
