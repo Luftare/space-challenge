@@ -24,7 +24,6 @@ export default class GameScene extends Phaser.Scene {
           debug: false,
         },
       },
-      input: { activePointers: 3 },
     });
   }
 

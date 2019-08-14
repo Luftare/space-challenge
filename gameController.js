@@ -1,12 +1,14 @@
 let players = [];
 
 const COUNTDOWN_START = 6;
-const LEVEL_COUNT = 23;
+const LEVEL_COUNT = 24;
 let countDownInterval = false;
 let gameOverTimeout = false;
 let countDown = COUNTDOWN_START;
 let levelIndex = 0;
 let lastLevelIndex = levelIndex;
+let levelsBuffer = [levelIndex];
+const LEVELS_BUFFER_LENGTH = Math.floor(LEVEL_COUNT * 0.5);
 let io;
 
 const initGame = _io => {
@@ -119,8 +121,14 @@ function handleGameOver() {
 function generateNewLevelIndex() {
   let newLevelIndex = levelIndex;
 
-  while (newLevelIndex === levelIndex) {
+  while (levelsBuffer.includes(newLevelIndex)) {
     newLevelIndex = Math.floor(Math.random() * LEVEL_COUNT);
+  }
+
+  levelsBuffer.push(newLevelIndex);
+
+  if (levelsBuffer.length > LEVELS_BUFFER_LENGTH) {
+    levelsBuffer.shift();
   }
   return newLevelIndex;
 }
