@@ -6,7 +6,7 @@ export default class Opponent extends Player {
     super(game, characters[model.characterIndex]);
     this.nameTag = game.add.text(0, 0, model.name);
     this.nameTag.setOrigin(0.5, 0.5);
-    this.sprite.setAlpha(0.6);
+    this.sprite.setAlpha(0.4);
     this.id = model.id;
   }
 

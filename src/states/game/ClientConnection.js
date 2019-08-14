@@ -1,4 +1,5 @@
 import Opponent from './Opponent';
+import { characters } from '../boot';
 
 const EMIT_UPDATE_DT = 20;
 
@@ -16,8 +17,22 @@ export default class ClientConnection {
 
     socket.removeAllListeners();
 
-    socket.on('STATE_UPDATE', playerModels => {
-      playerModels
+    socket.on('STATE_UPDATE', ({ players, levelIndex }) => {
+      if (levelIndex !== this.game.levelIndex) {
+        this.game.scene.start('game', { levelIndex });
+        return;
+      }
+
+      const remoteSelf = players.find(p => p.id === socket.id);
+
+      if (remoteSelf) {
+        window.globalContext.score = Math.max(
+          window.globalContext.score,
+          remoteSelf.totalScore
+        );
+      }
+
+      players
         .filter(model => model.id !== socket.id)
         .forEach(opponentModel => {
           const localOpponent = this.opponents.find(
@@ -32,7 +47,7 @@ export default class ClientConnection {
         });
 
       this.opponents = this.opponents.filter(opponent => {
-        const opponentIncludedInRemoteState = playerModels.some(
+        const opponentIncludedInRemoteState = players.some(
           m => m.id === opponent.id
         );
 
@@ -42,6 +57,14 @@ export default class ClientConnection {
           opponent.destroy();
           return false;
         }
+      });
+    });
+
+    socket.on('reconnect', () => {
+      socket.emit('LOGIN', {
+        name: window.globalContext.name,
+        characterIndex: characters.indexOf(window.globalContext.character),
+        score: window.globalContext.score,
       });
     });
 
@@ -70,6 +93,18 @@ export default class ClientConnection {
           this.game.rocket.receivePlayer();
         }
       );
+    });
+
+    socket.on('NEW_GAME', ({ levelIndex }) => {
+      this.game.scene.start('game', { levelIndex });
+    });
+
+    socket.on('PREPARE_LEVEL', ({ levelIndex }) => {
+      this.game.scene.start('game', { levelIndex });
+    });
+
+    socket.on('JOIN_GAME', ({ levelIndex }) => {
+      this.game.scene.start('game', { levelIndex });
     });
 
     socket.on('GAME_OVER', playerScores => {

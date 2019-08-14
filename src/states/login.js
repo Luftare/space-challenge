@@ -58,6 +58,7 @@ export default class BootScene extends Phaser.Scene {
         socket.emit('LOGIN', {
           name: window.globalContext.name,
           characterIndex: characters.indexOf(window.globalContext.character),
+          score: window.globalContext.score,
         });
         playButton.setScale(0.0, 0.0);
       });

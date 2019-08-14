@@ -28,6 +28,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   init(data) {
+    this.levelIndex = data.levelIndex;
     this.level = levels[data.levelIndex];
     this.connection = new ClientConnection(this, window.globalContext.socket);
   }

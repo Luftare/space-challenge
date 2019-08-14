@@ -5,14 +5,14 @@ const LEVEL_COUNT = 10;
 let countDownInterval = false;
 let gameOverTimeout = false;
 let countDown = COUNTDOWN_START;
-let levelIndex = 8;
+let levelIndex = 0;
 let lastLevelIndex = levelIndex;
 let io;
 
 const initGame = _io => {
   io = _io;
   setInterval(() => {
-    io.sockets.emit('STATE_UPDATE', players);
+    io.sockets.emit('STATE_UPDATE', { players, levelIndex });
   }, 30);
 
   io.sockets.on('connection', socket => {
@@ -26,9 +26,14 @@ const initGame = _io => {
       players = players.map(p => (p.id === socket.id ? { ...p, ...state } : p));
     });
 
-    socket.on('LOGIN', ({ name, characterIndex }) => {
-      players.push(generatePlayer(socket.id, name, characterIndex));
-      socket.emit('JOIN_GAME', { levelIndex });
+    socket.on('LOGIN', ({ name, characterIndex, score }) => {
+      console.log('LOGIN: ', socket.id);
+      const playerExists = players.some(p => p.id === socket.id);
+      if (!playerExists) {
+        const player = generatePlayer(socket.id, name, characterIndex, score);
+        players.push(player);
+        socket.emit('JOIN_GAME', { levelIndex });
+      }
     });
 
     socket.on('PLAYER_REACH_GOAL', ({ totalTime }) => {
@@ -38,16 +43,14 @@ const initGame = _io => {
     socket.on('PLAYER_HIT_BLACK_HOLE', ({ x, y }) => {
       socket.broadcast.emit('OPPONENT_HIT_BLACK_HOLE', { x, y, id: socket.id });
     });
-
-    socket.emit('NEW_GAME', { levelIndex });
   });
 };
 
-function generatePlayer(id, name, characterIndex) {
+function generatePlayer(id, name, characterIndex, score = 0) {
   return {
     finished: false,
     totalTime: 0,
-    totalScore: 0,
+    totalScore: score,
     lastScore: 0,
     d: 1,
     r: false,

@@ -88,6 +88,7 @@ document.getElementById('submit').addEventListener('click', () => {
       socket: null,
       name,
       character: {},
+      localScore: 0,
     };
     document.getElementById('login').style.display = 'none';
     document.getElementById('game-root').hidden = false;
