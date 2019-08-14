@@ -16,8 +16,9 @@ import level14 from './level-14';
 import level15 from './level-15';
 import level16 from './level-16';
 import level17 from './level-17';
+import level18 from './level-18';
 
-export default [
+module.exports = [
   level0,
   level1,
   level2,
@@ -36,4 +37,5 @@ export default [
   level15,
   level16,
   level17,
+  level18,
 ];
