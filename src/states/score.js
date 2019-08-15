@@ -37,11 +37,29 @@ export default class GameScene extends Phaser.Scene {
       })
       .setOrigin(0.5, 0.5);
 
+    const fastestPlayer = playerScores
+      .filter(p => p.totalTime > 0)
+      .sort((a, b) => a.totalTime - b.totalTime)[0];
+
+    const formattedFastestPlayerTime =
+      Math.round(fastestPlayer.totalTime / 100) / 10;
+
+    this.add
+      .text(
+        width * 0.5,
+        100,
+        `Best time: ${formattedFastestPlayerTime}s by ${fastestPlayer.name}`,
+        {
+          fontSize: 26,
+        }
+      )
+      .setOrigin(0.5, 0.5);
+
     playerScores
       .sort((a, b) => b.totalScore - a.totalScore)
       .forEach((player, position) => {
         const x = width * 0.1;
-        const y = 120 + position * 50;
+        const y = 150 + position * 50;
         this.add
           .text(x + 50, y, `${player.name}: ${player.totalScore}`, {
             fontSize: 30,

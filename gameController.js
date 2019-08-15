@@ -11,6 +11,8 @@ let levelsBuffer = [levelIndex];
 const LEVELS_BUFFER_LENGTH = Math.floor(LEVEL_COUNT * 0.7);
 let io;
 
+const sleep = time => new Promise(res => setTimeout(res, time));
+
 const initGame = _io => {
   io = _io;
   setInterval(() => {
@@ -20,7 +22,6 @@ const initGame = _io => {
   io.sockets.on('connection', socket => {
     socket.on('disconnect', () => {
       players = players.filter(player => player.id !== socket.id);
-
       console.log('DISCONNECT:', socket.id);
     });
 
