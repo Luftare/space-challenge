@@ -102,7 +102,7 @@ function handleGameOver() {
     .filter(player => player.finished)
     .sort((a, b) => a.totalTime - b.totalTime)
     .forEach((player, position) => {
-      const receivedScore = Math.max(0, 100 - position * 35);
+      const receivedScore = Math.max(0, 100 - position * 25);
       player.lastScore = receivedScore;
       player.totalScore += receivedScore;
     });
