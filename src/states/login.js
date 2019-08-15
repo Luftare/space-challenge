@@ -1,8 +1,6 @@
 import io from 'socket.io-client';
 import { characters } from './boot';
 
-let socket;
-
 export default class BootScene extends Phaser.Scene {
   constructor() {
     super({ key: 'login' });
@@ -10,7 +8,7 @@ export default class BootScene extends Phaser.Scene {
 
   create() {
     const { width, height } = this.game.scale;
-    socket = io();
+    const socket = window.globalContext.socket || io();
     window.globalContext.socket = socket;
     window.globalContext.character = characters[0];
 
@@ -59,25 +57,37 @@ export default class BootScene extends Phaser.Scene {
     characterOptions.forEach(option => option.setScale(0.5));
     characterOptions[0].setScale(1);
 
-    const playButton = this.add
-      .text(width * 0.5, height - 100, 'play', {
-        fontSize: 60,
-        color: 'yellow',
-      })
+    const buttonStyle = {
+      fontSize: 40,
+      color: 'yellow',
+      backgroundColor: '#777777',
+    };
+
+    this.challengeButton = this.add
+      .text(width * 0.33, height - 100, 'challenge', buttonStyle)
       .setOrigin(0.5, 0.5)
       .setInteractive()
       .on('pointerdown', () => {
+        socket.on('START_GAME', ({ levelIndex }) => {
+          this.scene.start('game', { levelIndex });
+        });
+
         socket.emit('LOGIN', {
           name: window.globalContext.name,
           characterIndex: characters.indexOf(window.globalContext.character),
           score: window.globalContext.score,
         });
-        playButton.setScale(0.0, 0.0);
+
+        this.challengeButton.setScale(0.0, 0.0);
       });
 
-    socket.on('START_GAME', ({ levelIndex }) => {
-      this.scene.start('game', { levelIndex });
-    });
+    this.add
+      .text(width * 0.66, height - 100, 'solo', buttonStyle)
+      .setOrigin(0.5, 0.5)
+      .setInteractive()
+      .on('pointerdown', () => {
+        this.scene.start('selectLevel');
+      });
   }
 
   update() {}

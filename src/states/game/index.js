@@ -6,6 +6,7 @@ import Opponent from './Opponent';
 import Player from './LocalPlayer';
 import Rocket from './Rocket';
 import ClientConnection from './ClientConnection';
+import { mockIo } from '../../utils';
 
 const GRAVITY = 300;
 const GRID_SIZE = 60;
@@ -29,9 +30,11 @@ export default class GameScene extends Phaser.Scene {
   }
 
   init(data) {
+    this.solo = data.solo || window.globalContext.levelEditMode;
     this.levelIndex = data.levelIndex;
     this.level = levels[data.levelIndex];
-    this.connection = new ClientConnection(this, window.globalContext.socket);
+    const socket = this.solo ? mockIo() : window.globalContext.socket;
+    this.connection = new ClientConnection(this, socket);
   }
 
   create() {
@@ -52,7 +55,6 @@ export default class GameScene extends Phaser.Scene {
     this.decodeLevel(this.level);
 
     this.player = new Player(this, window.globalContext.character);
-    this.player.respawn(this.spawnPoint);
 
     const buttonStyle = {
       fontSize: '24px',
@@ -64,40 +66,42 @@ export default class GameScene extends Phaser.Scene {
       align: 'center',
     };
 
-    this.input.keyboard.on('keydown', e => {
-      const numberKey = parseInt(e.key);
-      if (!isNaN(numberKey)) {
-        const tauntIndex = numberKey - 1;
-        const taunt = taunts[tauntIndex];
+    if (!this.solo) {
+      this.input.keyboard.on('keydown', e => {
+        const numberKey = parseInt(e.key);
+        if (!isNaN(numberKey)) {
+          const tauntIndex = numberKey - 1;
+          const taunt = taunts[tauntIndex];
 
-        if (taunt) {
-          this.player.taunt(taunt);
-          this.connection.emitTaunt(taunt);
+          if (taunt) {
+            this.player.taunt(taunt);
+            this.connection.emitTaunt(taunt);
+          }
         }
-      }
-    });
+      });
 
-    taunts.forEach((taunt, i, taunts) => {
-      const tauntCenterDistance = width / (taunts.length + 1);
-      const startX = tauntCenterDistance;
-      const x = startX + tauntCenterDistance * i;
+      taunts.forEach((taunt, i, taunts) => {
+        const tauntCenterDistance = width / (taunts.length + 1);
+        const startX = tauntCenterDistance;
+        const x = startX + tauntCenterDistance * i;
 
-      this.add
-        .text(x, height - 190, taunt, {
-          color: 'white',
-          fontSize: 25,
-          backgroundColor: '#444444',
-          padding: 12,
-        })
-        .setOrigin(0.5, 0.5)
-        .setScrollFactor(0)
-        .setInteractive()
-        .setDepth(3)
-        .on('pointerdown', () => {
-          this.player.taunt(taunt);
-          this.connection.emitTaunt(taunt);
-        });
-    });
+        this.add
+          .text(x, height - 190, taunt, {
+            color: 'white',
+            fontSize: 25,
+            backgroundColor: '#444444',
+            padding: 12,
+          })
+          .setOrigin(0.5, 0.5)
+          .setScrollFactor(0)
+          .setInteractive()
+          .setDepth(3)
+          .on('pointerdown', () => {
+            this.player.taunt(taunt);
+            this.connection.emitTaunt(taunt);
+          });
+      });
+    }
 
     this.leftButton = this.add
       .sprite(0, height, 'toggle-direction-button')
@@ -147,8 +151,10 @@ export default class GameScene extends Phaser.Scene {
         if (!this.player.finished) {
           this.player.finished = true;
           const totalTime = this.player.getTotalTime();
-          if (window.globalContext.levelEditMode) {
+          if (this.solo) {
             this.player.respawn(this.spawnPoint);
+            const seconds = Math.floor(totalTime / 100) / 10;
+            this.flashMessage(`${seconds}s`);
           } else {
             this.connection.handlePlayerReachGoal(totalTime);
           }
@@ -221,6 +227,27 @@ export default class GameScene extends Phaser.Scene {
       .setOrigin(0.5, 0.5)
       .setScrollFactor(0);
 
+    if (this.solo) {
+      this.add
+        .text(60, 40, 'levels', {
+          fontSize: 20,
+          color: 'yellow',
+          shadow: {
+            offsetX: 3,
+            offsetY: 4,
+            color: 'black',
+            blur: 0,
+            fill: true,
+          },
+        })
+        .setOrigin(0.5, 0.5)
+        .setScrollFactor(0)
+        .setInteractive()
+        .on('pointerdown', () => {
+          this.scene.start('selectLevel');
+        });
+    }
+
     this.fuelBar = new Phaser.Geom.Rectangle(0, 0, width, 8);
     this.fuelBarGraphics = this.add.graphics({
       x: 0,
@@ -229,6 +256,8 @@ export default class GameScene extends Phaser.Scene {
     });
     this.fuelBarGraphics.fillRectShape(this.fuelBar);
     this.fuelBarGraphics.setScrollFactor(0);
+
+    this.player.respawn(this.spawnPoint);
   }
 
   flashMessage(text) {

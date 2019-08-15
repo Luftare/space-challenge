@@ -100,6 +100,10 @@ export default class LocalPlayer extends Player {
     this.rocketing = false;
     this.spawning = true;
 
+    if (this.game.solo) {
+      this.startTime = Date.now();
+    }
+
     this.game.tweens.add({
       targets: this.sprite,
       alpha: 0,

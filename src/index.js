@@ -3,7 +3,8 @@ import BootState, { characters } from './states/boot';
 import GameState from './states/game';
 import ScoreState from './states/score';
 import LoginState from './states/login';
-import { isMobileDevice } from './utils';
+import SelectLevel from './states/selectLevel';
+import { isMobileDevice, mockIo } from './utils';
 
 const levelEditMode = process.env.NODE_ENV === 'level_edit';
 const PLAYER_NAME_KEY = 'space-dash-name';
@@ -23,7 +24,7 @@ const gameConfig = {
   },
   pixelArt: true,
   title: 'Space dash',
-  scene: [BootState, LoginState, GameState, ScoreState],
+  scene: [BootState, LoginState, SelectLevel, GameState, ScoreState],
 };
 
 function newGame() {
@@ -109,11 +110,7 @@ if (levelEditMode) {
 
   window.globalContext = {
     levelEditMode,
-    socket: {
-      on: () => {},
-      emit: () => {},
-      removeAllListeners: () => {},
-    },
+    socket: mockIo(),
     name: 'tester',
     character: characters[0],
   };

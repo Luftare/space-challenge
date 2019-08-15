@@ -13,3 +13,9 @@ export const isMobileDevice = () => {
   })(navigator.userAgent || navigator.vendor || window.opera);
   return check;
 };
+
+export const mockIo = () => ({
+  on: () => {},
+  emit: () => {},
+  removeAllListeners: () => {},
+});
