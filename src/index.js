@@ -6,6 +6,7 @@ import LoginState from './states/login';
 import { isMobileDevice } from './utils';
 
 const levelEditMode = process.env.NODE_ENV === 'level_edit';
+const PLAYER_NAME_KEY = 'space-dash-name';
 
 const mobile = isMobileDevice();
 
@@ -83,6 +84,9 @@ document.getElementById('submit').addEventListener('click', () => {
   const validName = validateName(name);
 
   if (validName) {
+    if (window.localStorage) {
+      localStorage.setItem(PLAYER_NAME_KEY, name);
+    }
     window.globalContext = {
       levelEditMode,
       socket: null,
@@ -114,4 +118,10 @@ if (levelEditMode) {
     character: characters[0],
   };
   newGame();
+}
+
+if (window.localStorage) {
+  const name = localStorage.getItem(PLAYER_NAME_KEY) || '';
+  document.getElementById('name').value = name;
+  document.getElementById('submit').disabled = false;
 }
