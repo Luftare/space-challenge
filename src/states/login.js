@@ -63,7 +63,7 @@ export default class BootScene extends Phaser.Scene {
         playButton.setScale(0.0, 0.0);
       });
 
-    socket.on('JOIN_GAME', ({ levelIndex }) => {
+    socket.on('START_GAME', ({ levelIndex }) => {
       this.scene.start('game', { levelIndex });
     });
   }

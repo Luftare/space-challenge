@@ -23,7 +23,7 @@ export default class GameScene extends Phaser.Scene {
     socket.removeAllListeners();
     playerScores = data.playerScores;
 
-    socket.on('PREPARE_LEVEL', ({ levelIndex }) => {
+    socket.on('START_GAME', ({ levelIndex }) => {
       this.scene.start('game', { levelIndex });
     });
   }

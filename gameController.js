@@ -35,7 +35,7 @@ const initGame = _io => {
       if (!playerExists) {
         const player = generatePlayer(socket.id, name, characterIndex, score);
         players.push(player);
-        socket.emit('JOIN_GAME', { levelIndex });
+        socket.emit('START_GAME', { levelIndex });
       }
     });
 
@@ -109,13 +109,16 @@ function handleGameOver() {
     console.log('NEW GAME!');
     countDownInterval = false;
     countDown = COUNTDOWN_START;
+
     players.forEach(player => {
       player.totalTime = 0;
       player.finished = false;
       player.lastScore = 0;
     });
+
     levelIndex = generateNewLevelIndex();
-    io.sockets.emit('PREPARE_LEVEL', { levelIndex });
+
+    io.sockets.emit('START_GAME', { levelIndex });
   }, 8000);
 }
 
