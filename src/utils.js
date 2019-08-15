@@ -18,4 +18,7 @@ export const mockIo = () => ({
   on: () => {},
   emit: () => {},
   removeAllListeners: () => {},
+  io: {
+    engine: { id: 0 },
+  },
 });

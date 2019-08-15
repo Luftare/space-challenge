@@ -9,6 +9,7 @@ export default class BootScene extends Phaser.Scene {
   create() {
     const { width, height } = this.game.scale;
     const socket = window.globalContext.socket || io();
+    socket.removeAllListeners();
     window.globalContext.socket = socket;
     window.globalContext.character = characters[0];
 
@@ -61,6 +62,7 @@ export default class BootScene extends Phaser.Scene {
       fontSize: 40,
       color: 'yellow',
       backgroundColor: '#777777',
+      padding: 8,
     };
 
     this.challengeButton = this.add
@@ -86,8 +88,21 @@ export default class BootScene extends Phaser.Scene {
       .setOrigin(0.5, 0.5)
       .setInteractive()
       .on('pointerdown', () => {
+        socket.removeAllListeners();
         this.scene.start('selectLevel');
       });
+
+    this.playerStatusText = this.add
+      .text(width * 0.33, height - 40, 123, {
+        fontSize: 14,
+        align: 'center',
+      })
+      .setVisible(false)
+      .setOrigin(0.5, 0.5);
+
+    socket.on('PLAYER_COUNT', count => {
+      this.playerStatusText.setVisible(true).setText(`${count} online`);
+    });
   }
 
   update() {}

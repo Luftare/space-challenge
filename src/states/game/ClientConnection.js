@@ -7,6 +7,7 @@ export default class ClientConnection {
   constructor(game, socket) {
     this.game = game;
     this.socket = socket;
+    this.id = socket.io.engine.id;
     this.lastUpdateTime = Date.now();
     this.opponents = [];
     this.setupSocketHandlers();
@@ -14,7 +15,6 @@ export default class ClientConnection {
 
   setupSocketHandlers() {
     const socket = this.socket;
-
     socket.removeAllListeners();
 
     socket.on('STATE_UPDATE', ({ players, levelIndex }) => {
@@ -23,7 +23,7 @@ export default class ClientConnection {
         return;
       }
 
-      const remoteSelf = players.find(p => p.id === socket.id);
+      const remoteSelf = players.find(p => p.id === this.id);
 
       if (remoteSelf) {
         window.globalContext.score = Math.max(
@@ -33,7 +33,7 @@ export default class ClientConnection {
       }
 
       players
-        .filter(model => model.id !== socket.id)
+        .filter(model => model.id !== this.id)
         .forEach(opponentModel => {
           const localOpponent = this.opponents.find(
             p => p.id === opponentModel.id
@@ -89,7 +89,7 @@ export default class ClientConnection {
     });
 
     socket.on('PLAYER_REACH_GOAL', finishedPlayer => {
-      const isSelf = finishedPlayer.id === socket.id;
+      const isSelf = finishedPlayer.id === this.id;
       const target = isSelf
         ? this.game.player
         : this.opponents.find(p => p.id === finishedPlayer.id);
