@@ -4,6 +4,7 @@ const PLAYER_VELOCITY = 100;
 const PLAYER_JUMP_VELOCITY = 300;
 const PLAYER_ROCKET_ACCELERATION_X = 200;
 const PLAYER_ROCKET_ACCELERATION_Y = 600;
+const PLAYER_TAUNT_DOWNTIME = 300;
 export const MAX_PLAYER_FUEL = 50;
 
 export default class LocalPlayer extends Player {
@@ -16,6 +17,7 @@ export default class LocalPlayer extends Player {
     this.fuel = 0;
     this.failed = false;
     this.inBlackHole = false;
+    this.lastTauntTime = Date.now();
 
     this.sprite.setSize(30, 54);
     this.sprite.setOffset(0.5, 0.5);
@@ -157,5 +159,15 @@ export default class LocalPlayer extends Player {
 
   setMaxFuel() {
     this.fuel = MAX_PLAYER_FUEL;
+  }
+
+  taunt(...args) {
+    const now = Date.now();
+    const canTaunt = now - this.lastTauntTime > PLAYER_TAUNT_DOWNTIME;
+
+    if (canTaunt) {
+      this.lastTauntTime = now;
+      super.taunt(...args);
+    }
   }
 }
