@@ -63,6 +63,28 @@ export default class GameScene extends Phaser.Scene {
       align: 'center',
     };
 
+    ['OMG', 'XD', 'WOW', 'LOL'].forEach((taunt, i, taunts) => {
+      const tauntCenterDistance = width / (taunts.length + 1);
+      const startX = tauntCenterDistance;
+      const x = startX + tauntCenterDistance * i;
+
+      this.add
+        .text(x, height - 190, taunt, {
+          color: 'white',
+          fontSize: 25,
+          backgroundColor: '#444444',
+          padding: 12,
+        })
+        .setOrigin(0.5, 0.5)
+        .setScrollFactor(0)
+        .setInteractive()
+        .setDepth(3)
+        .on('pointerdown', () => {
+          this.player.taunt(taunt);
+          this.connection.emitTaunt(taunt);
+        });
+    });
+
     this.leftButton = this.add
       .sprite(0, height, 'toggle-direction-button')
       .setOrigin(0, 1)

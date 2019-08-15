@@ -29,6 +29,10 @@ const initGame = _io => {
       players = players.map(p => (p.id === socket.id ? { ...p, ...state } : p));
     });
 
+    socket.on('TAUNT', taunt => {
+      socket.broadcast.emit('OPPONENT_TAUNT', { taunt, id: socket.id });
+    });
+
     socket.on('LOGIN', ({ name, characterIndex, score }) => {
       console.log('LOGIN: ', socket.id);
       const playerExists = players.some(p => p.id === socket.id);

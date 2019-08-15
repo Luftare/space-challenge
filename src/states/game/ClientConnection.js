@@ -73,6 +73,14 @@ export default class ClientConnection {
       this.game.flashMessage(text);
     });
 
+    socket.on('OPPONENT_TAUNT', ({ taunt, id }) => {
+      const tauntingOpponent = this.opponents.find(o => o.id === id);
+
+      if (tauntingOpponent) {
+        tauntingOpponent.taunt(taunt);
+      }
+    });
+
     socket.on('OPPONENT_HIT_BLACK_HOLE', ({ id, x, y }) => {
       const opponent = this.opponents.find(o => o.id === id);
       if (!opponent) return;
@@ -129,5 +137,9 @@ export default class ClientConnection {
 
       this.lastUpdateTime = now;
     }
+  }
+
+  emitTaunt(taunt) {
+    this.socket.emit('TAUNT', taunt);
   }
 }

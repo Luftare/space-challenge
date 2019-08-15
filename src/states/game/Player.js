@@ -79,4 +79,24 @@ export default class Player {
       duration: 400,
     });
   }
+
+  taunt(message) {
+    const taunt = this.game.add
+      .text(this.sprite.x, this.sprite.y - 15, message, {
+        fontSize: 24,
+        color: 'yellow',
+      })
+      .setScale(0.5);
+
+    this.game.tweens.add({
+      targets: taunt,
+      y: this.sprite.y - Phaser.Math.FloatBetween(100, 160),
+      x: this.sprite.x - Phaser.Math.FloatBetween(-50, 50),
+      scale: 1,
+      duration: 1000,
+      onComplete: () => {
+        taunt.destroy();
+      },
+    });
+  }
 }
