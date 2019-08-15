@@ -75,7 +75,6 @@ export default class GameScene extends Phaser.Scene {
 
           if (taunt) {
             this.player.taunt(taunt);
-            this.connection.emitTaunt(taunt);
           }
         }
       });
@@ -98,7 +97,6 @@ export default class GameScene extends Phaser.Scene {
           .setDepth(3)
           .on('pointerdown', () => {
             this.player.taunt(taunt);
-            this.connection.emitTaunt(taunt);
           });
       });
     }

@@ -20,7 +20,7 @@ const initGame = _io => {
   }, 30);
 
   io.sockets.on('connection', socket => {
-    io.sockets.emit('PLAYER_COUNT', players.length);
+    socket.emit('PLAYER_COUNT', players.length);
 
     socket.on('disconnect', () => {
       players = players.filter(player => player.id !== socket.id);
@@ -43,6 +43,7 @@ const initGame = _io => {
         const player = generatePlayer(socket.id, name, characterIndex, score);
         players.push(player);
         socket.emit('START_GAME', { levelIndex });
+        io.sockets.emit('PLAYER_COUNT', players.length);
       }
     });
 

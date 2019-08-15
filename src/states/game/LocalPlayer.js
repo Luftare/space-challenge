@@ -165,13 +165,14 @@ export default class LocalPlayer extends Player {
     this.fuel = MAX_PLAYER_FUEL;
   }
 
-  taunt(...args) {
+  taunt(taunt) {
     const now = Date.now();
     const canTaunt = now - this.lastTauntTime > PLAYER_TAUNT_DOWNTIME;
 
     if (canTaunt) {
+      this.game.connection.emitTaunt(taunt);
       this.lastTauntTime = now;
-      super.taunt(...args);
+      super.taunt(taunt);
     }
   }
 }
