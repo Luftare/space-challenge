@@ -9,6 +9,7 @@ import ClientConnection from './ClientConnection';
 
 const GRAVITY = 300;
 const GRID_SIZE = 60;
+const taunts = ['OMG', '🎵', '❤️', 'oops', 'LOL'];
 
 let level;
 let background;
@@ -63,7 +64,20 @@ export default class GameScene extends Phaser.Scene {
       align: 'center',
     };
 
-    ['OMG', 'XD', 'WOW', 'LOL'].forEach((taunt, i, taunts) => {
+    this.input.keyboard.on('keydown', e => {
+      const numberKey = parseInt(e.key);
+      if (!isNaN(numberKey)) {
+        const tauntIndex = numberKey - 1;
+        const taunt = taunts[tauntIndex];
+
+        if (taunt) {
+          this.player.taunt(taunt);
+          this.connection.emitTaunt(taunt);
+        }
+      }
+    });
+
+    taunts.forEach((taunt, i, taunts) => {
       const tauntCenterDistance = width / (taunts.length + 1);
       const startX = tauntCenterDistance;
       const x = startX + tauntCenterDistance * i;

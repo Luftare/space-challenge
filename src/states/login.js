@@ -20,17 +20,29 @@ export default class BootScene extends Phaser.Scene {
       })
       .setOrigin(0.5, 0.5);
 
-    const characterMargin = 180;
-    const charactersWidth = (characters.length - 1) * characterMargin;
+    const characterOffset = 160;
+    const charactersWidth = (characters.length - 1) * characterOffset;
     const charactersLeftStart = width * 0.5 - charactersWidth * 0.5;
 
     const characterOptions = [];
 
+    const characterGridColumns = Math.floor(Math.sqrt(characters.length));
+    const characterGridWidth = (characterGridColumns - 1) * characterOffset;
+    const centerX = width * 0.5;
+    const centerY = height * 0.5;
+    const topLeftCellX = centerX - 0.5 * characterGridWidth;
+    const topLeftCellY = centerY - 0.5 * characterGridWidth;
+
     characters.forEach((character, i) => {
-      const x = charactersLeftStart + i * characterMargin;
+      const columns = 2;
+      const indexX = i % columns;
+      const indexY = Math.floor(i / columns);
+      const x = topLeftCellX + indexX * characterOffset;
+      const y = topLeftCellY + indexY * characterOffset;
+
       const characterOption = this.add.sprite(
         x,
-        height * 0.5,
+        y,
         `${character.name}-avatar`,
         0
       );
