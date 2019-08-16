@@ -11,7 +11,9 @@ export default class Player {
     this.emitter = new Emitter(game, character);
 
     if (enablePhysics) {
-      this.sprite = this.game.physics.add.sprite(0, 0, character.name, 0);
+      this.sprite = this.game.physics.add
+        .sprite(0, 0, character.name, 0)
+        .setOrigin(0.5);
     } else {
       this.sprite = this.game.add.sprite(0, 0, character.name, 0);
     }

@@ -146,6 +146,7 @@ export default class GameScene extends Phaser.Scene {
 
     this.physics.add.overlap(this.player.sprite, this.rocket.sprite, () => {
       if (this.player.sprite.body.blocked.down) {
+        this.player.sprite.setVelocity(0);
         if (!this.player.finished) {
           this.player.finished = true;
           const totalTime = this.player.getTotalTime();

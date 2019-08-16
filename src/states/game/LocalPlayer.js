@@ -91,10 +91,14 @@ export default class LocalPlayer extends Player {
   respawn(spawnPoint) {
     this.failed = false;
     this.inBlackHole = false;
-    this.sprite.setScale(1, 1);
     this.finished = false;
-    this.sprite.setPosition(spawnPoint.x, spawnPoint.y, 0, 0);
-    this.sprite.setVelocity(0, 0);
+    this.sprite.setScale(1, 1);
+
+    setTimeout(() => {
+      this.sprite.setVelocity(0, 0);
+      this.sprite.setPosition(spawnPoint.x, spawnPoint.y, 0, 0);
+    }, 0);
+
     this.direction = spawnPoint.direction;
     this.fuel = 0;
     this.rocketing = false;
@@ -108,7 +112,7 @@ export default class LocalPlayer extends Player {
       onComplete: () => {
         const firstSpawn = this.startTime === 0;
 
-        if (firstSpawn || this.solo) {
+        if (firstSpawn || this.game.solo) {
           this.startTime = Date.now();
         }
 

@@ -171,9 +171,7 @@ export default class BootScene extends Phaser.Scene {
     });
 
     if (window.globalContext.levelEditMode) {
-      const levelIndex =
-        parseInt(new URLSearchParams(window.location.search).get('level')) || 0;
-      this.scene.start('game', { levelIndex });
+      this.scene.start('selectLevel');
     } else {
       this.scene.start('login');
     }
