@@ -1,5 +1,6 @@
 import io from 'socket.io-client';
 import { characters } from './boot';
+import { headlineStyle, headlineOffset } from './style';
 
 export default class BootScene extends Phaser.Scene {
   constructor() {
@@ -14,9 +15,7 @@ export default class BootScene extends Phaser.Scene {
     window.globalContext.character = characters[0];
 
     this.add
-      .text(width * 0.5, 80, 'Select character', {
-        fontSize: 30,
-      })
+      .text(width * 0.5, headlineOffset.y, 'Select character', headlineStyle)
       .setOrigin(0.5, 0.5);
 
     const characterOffset = 160;

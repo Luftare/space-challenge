@@ -7,6 +7,7 @@ import Player from './LocalPlayer';
 import Rocket from './Rocket';
 import ClientConnection from './ClientConnection';
 import { mockIo } from '../../utils';
+import { smallButtonStyle, cornerOffset } from '../style';
 
 const GRAVITY = 300;
 const GRID_SIZE = 60;
@@ -108,27 +109,6 @@ export default class GameScene extends Phaser.Scene {
       .setOrigin(0.5, 0.5)
       .setScrollFactor(0);
 
-    if (this.solo) {
-      this.add
-        .text(60, 40, 'levels', {
-          fontSize: 20,
-          color: 'yellow',
-          shadow: {
-            offsetX: 3,
-            offsetY: 4,
-            color: 'black',
-            blur: 0,
-            fill: true,
-          },
-        })
-        .setOrigin(0.5, 0.5)
-        .setScrollFactor(0)
-        .setInteractive()
-        .on('pointerdown', () => {
-          this.scene.start('selectLevel');
-        });
-    }
-
     this.fuelBar = new Phaser.Geom.Rectangle(0, 0, this.width, 8);
     this.fuelBarGraphics = this.add.graphics({
       x: 0,
@@ -138,17 +118,30 @@ export default class GameScene extends Phaser.Scene {
     this.fuelBarGraphics.fillRectShape(this.fuelBar);
     this.fuelBarGraphics.setScrollFactor(0);
 
-    const buttonStyle = {
-      fontSize: '24px',
-      backgroundColor: 'green',
-      valign: 'center',
-      halign: 'center',
-      fixedWidth: this.width * 0.5,
-      fixedHeight: 150,
-      align: 'center',
-    };
+    if (this.solo) {
+      this.add
+        .text(cornerOffset.x, cornerOffset.y, 'levels', smallButtonStyle)
+        .setOrigin(0.5, 0.5)
+        .setScrollFactor(0)
+        .setInteractive()
+        .on('pointerdown', () => {
+          this.scene.start('selectLevel');
+        });
 
-    if (!this.solo) {
+      this.add
+        .text(
+          this.width - cornerOffset.x,
+          cornerOffset.y,
+          'reset',
+          smallButtonStyle
+        )
+        .setOrigin(0.5, 0.5)
+        .setScrollFactor(0)
+        .setInteractive()
+        .on('pointerdown', () => {
+          this.player.respawn(this.spawnPoint);
+        });
+    } else {
       this.input.keyboard.on('keydown', e => {
         const numberKey = parseInt(e.key);
         if (!isNaN(numberKey)) {
@@ -224,7 +217,7 @@ export default class GameScene extends Phaser.Scene {
           const totalTime = this.player.getTotalTime();
           if (this.solo) {
             this.player.respawn(this.spawnPoint);
-            const seconds = Math.floor(totalTime / 100) / 10;
+            const seconds = Math.floor(totalTime / 10) / 100;
             this.flashMessage(`${seconds}s`);
           } else {
             this.connection.handlePlayerReachGoal(totalTime);

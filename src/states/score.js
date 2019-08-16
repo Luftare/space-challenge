@@ -42,7 +42,7 @@ export default class GameScene extends Phaser.Scene {
       .sort((a, b) => a.totalTime - b.totalTime)[0];
 
     const formattedFastestPlayerTime =
-      Math.round(fastestPlayer.totalTime / 100) / 10;
+      Math.round(fastestPlayer.totalTime / 10) / 100;
 
     this.add
       .text(
@@ -50,7 +50,7 @@ export default class GameScene extends Phaser.Scene {
         100,
         `Best time: ${formattedFastestPlayerTime}s by ${fastestPlayer.name}`,
         {
-          fontSize: 26,
+          fontSize: 22,
         }
       )
       .setOrigin(0.5, 0.5);

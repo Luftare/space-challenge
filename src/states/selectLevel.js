@@ -1,4 +1,10 @@
 import levels from '../levels';
+import {
+  smallButtonStyle,
+  cornerOffset,
+  headlineOffset,
+  headlineStyle,
+} from './style';
 
 export default class SelectLevel extends Phaser.Scene {
   constructor() {
@@ -9,9 +15,7 @@ export default class SelectLevel extends Phaser.Scene {
     const { width, height } = this.game.scale;
 
     this.add
-      .text(width * 0.5, 80, 'Select level', {
-        fontSize: 30,
-      })
+      .text(width * 0.5, headlineOffset.y, 'Select level', headlineStyle)
       .setOrigin(0.5, 0.5);
 
     const levelOffset = 80;
@@ -45,17 +49,7 @@ export default class SelectLevel extends Phaser.Scene {
     });
 
     this.add
-      .text(60, 40, 'menu', {
-        fontSize: 20,
-        color: 'yellow',
-        shadow: {
-          offsetX: 3,
-          offsetY: 4,
-          color: 'black',
-          blur: 0,
-          fill: true,
-        },
-      })
+      .text(cornerOffset.x, cornerOffset.y, 'menu', smallButtonStyle)
       .setOrigin(0.5, 0.5)
       .setScrollFactor(0)
       .setInteractive()
