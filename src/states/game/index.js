@@ -31,6 +31,7 @@ export default class GameScene extends Phaser.Scene {
 
   init(data) {
     this.solo = data.solo || window.globalContext.levelEditMode;
+    this.character = window.globalContext.character;
     this.levelIndex = data.levelIndex;
     this.level = levels[data.levelIndex];
     const socket = this.solo ? mockIo() : window.globalContext.socket;
@@ -38,13 +39,14 @@ export default class GameScene extends Phaser.Scene {
   }
 
   create() {
-    const { width, height } = this.game.scale;
+    this.width = this.game.scale.width;
+    this.height = this.game.scale.height;
 
     background = this.add.tileSprite(
       0,
-      -height * 3,
-      width * 2,
-      height * 8,
+      -this.height * 3,
+      this.width * 2,
+      this.height * 8,
       'background'
     );
 
@@ -54,14 +56,94 @@ export default class GameScene extends Phaser.Scene {
 
     this.decodeLevel(this.level);
 
-    this.player = new Player(this, window.globalContext.character);
+    this.player = new Player(this, this.character);
+    this.player.respawn(this.spawnPoint);
+
+    this.setupCollisionHandlers();
+    this.setupGUI();
+    this.setupKeyboardInput();
+  }
+
+  setupKeyboardInput() {
+    this.input.keyboard.on('keydown-O', () => {
+      this.handleLeftInputDown();
+    });
+
+    this.input.keyboard.on('keydown-P', () => {
+      this.handleRightInputDown();
+    });
+
+    this.input.keyboard.on('keyup-P', () => {
+      this.handleRightInputUp();
+    });
+  }
+
+  flashMessage(text) {
+    this.GUIMessage.setVisible(true)
+      .setText(text)
+      .setScale(2);
+
+    this.tweens.add({
+      targets: this.GUIMessage,
+      scale: 1,
+      duration: 300,
+      ease: 'Cubic.easeOut',
+    });
+  }
+
+  setupGUI() {
+    this.GUIMessage = this.add
+      .text(this.width * 0.5, 100, 0, {
+        fontSize: 60,
+        color: 'yellow',
+        shadow: {
+          offsetX: 3,
+          offsetY: 4,
+          color: 'black',
+          blur: 0,
+          fill: true,
+        },
+      })
+      .setVisible(false)
+      .setOrigin(0.5, 0.5)
+      .setScrollFactor(0);
+
+    if (this.solo) {
+      this.add
+        .text(60, 40, 'levels', {
+          fontSize: 20,
+          color: 'yellow',
+          shadow: {
+            offsetX: 3,
+            offsetY: 4,
+            color: 'black',
+            blur: 0,
+            fill: true,
+          },
+        })
+        .setOrigin(0.5, 0.5)
+        .setScrollFactor(0)
+        .setInteractive()
+        .on('pointerdown', () => {
+          this.scene.start('selectLevel');
+        });
+    }
+
+    this.fuelBar = new Phaser.Geom.Rectangle(0, 0, this.width, 8);
+    this.fuelBarGraphics = this.add.graphics({
+      x: 0,
+      y: 0,
+      fillStyle: { color: 0xeeee00 },
+    });
+    this.fuelBarGraphics.fillRectShape(this.fuelBar);
+    this.fuelBarGraphics.setScrollFactor(0);
 
     const buttonStyle = {
       fontSize: '24px',
       backgroundColor: 'green',
       valign: 'center',
       halign: 'center',
-      fixedWidth: width * 0.5,
+      fixedWidth: this.width * 0.5,
       fixedHeight: 150,
       align: 'center',
     };
@@ -80,12 +162,12 @@ export default class GameScene extends Phaser.Scene {
       });
 
       taunts.forEach((taunt, i, taunts) => {
-        const tauntCenterDistance = width / (taunts.length + 1);
+        const tauntCenterDistance = this.width / (taunts.length + 1);
         const startX = tauntCenterDistance;
         const x = startX + tauntCenterDistance * i;
 
         this.add
-          .text(x, height - 190, taunt, {
+          .text(x, this.height - 190, taunt, {
             color: 'white',
             fontSize: 25,
             backgroundColor: '#444444',
@@ -102,7 +184,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     this.leftButton = this.add
-      .sprite(0, height, 'toggle-direction-button')
+      .sprite(0, this.height, 'toggle-direction-button')
       .setOrigin(0, 1)
       .setDepth(10)
       .setScrollFactor(0)
@@ -116,7 +198,7 @@ export default class GameScene extends Phaser.Scene {
       });
 
     this.rightButton = this.add
-      .sprite(width * 0.5, height, 'jump-rocket-button')
+      .sprite(this.width * 0.5, this.height, 'jump-rocket-button')
       .setOrigin(0, 1)
       .setDepth(10)
       .setScrollFactor(0)
@@ -129,19 +211,9 @@ export default class GameScene extends Phaser.Scene {
         this.handleRightInputUp();
         this.rightButton.setTint(0xffffff);
       });
+  }
 
-    this.input.keyboard.on('keydown-O', () => {
-      this.handleLeftInputDown();
-    });
-
-    this.input.keyboard.on('keydown-P', () => {
-      this.handleRightInputDown();
-    });
-
-    this.input.keyboard.on('keyup-P', () => {
-      this.handleRightInputUp();
-    });
-
+  setupCollisionHandlers() {
     this.physics.add.collider(this.player.sprite, this.platforms);
 
     this.physics.add.overlap(this.player.sprite, this.rocket.sprite, () => {
@@ -209,67 +281,6 @@ export default class GameScene extends Phaser.Scene {
         }
       }
     );
-
-    this.GUIMessage = this.add
-      .text(width * 0.5, 100, 0, {
-        fontSize: 60,
-        color: 'yellow',
-        shadow: {
-          offsetX: 3,
-          offsetY: 4,
-          color: 'black',
-          blur: 0,
-          fill: true,
-        },
-      })
-      .setVisible(false)
-      .setOrigin(0.5, 0.5)
-      .setScrollFactor(0);
-
-    if (this.solo) {
-      this.add
-        .text(60, 40, 'levels', {
-          fontSize: 20,
-          color: 'yellow',
-          shadow: {
-            offsetX: 3,
-            offsetY: 4,
-            color: 'black',
-            blur: 0,
-            fill: true,
-          },
-        })
-        .setOrigin(0.5, 0.5)
-        .setScrollFactor(0)
-        .setInteractive()
-        .on('pointerdown', () => {
-          this.scene.start('selectLevel');
-        });
-    }
-
-    this.fuelBar = new Phaser.Geom.Rectangle(0, 0, width, 8);
-    this.fuelBarGraphics = this.add.graphics({
-      x: 0,
-      y: 0,
-      fillStyle: { color: 0xeeee00 },
-    });
-    this.fuelBarGraphics.fillRectShape(this.fuelBar);
-    this.fuelBarGraphics.setScrollFactor(0);
-
-    this.player.respawn(this.spawnPoint);
-  }
-
-  flashMessage(text) {
-    this.GUIMessage.setVisible(true)
-      .setText(text)
-      .setScale(2);
-
-    this.tweens.add({
-      targets: this.GUIMessage,
-      scale: 1,
-      duration: 300,
-      ease: 'Cubic.easeOut',
-    });
   }
 
   handleLeftInputDown() {
@@ -347,7 +358,7 @@ export default class GameScene extends Phaser.Scene {
   updateCamera() {
     if (this.player.finished || this.player.failed) return;
     const x = 0;
-    const y = this.player.sprite.body.bottom - this.scale.height * 0.6;
+    const y = this.player.sprite.body.bottom - this.height * 0.6;
 
     this.cameras.main.setScroll(x, y);
 

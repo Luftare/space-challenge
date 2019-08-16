@@ -93,8 +93,11 @@ export default class LocalPlayer extends Player {
     this.inBlackHole = false;
     this.finished = false;
     this.sprite.setScale(1, 1);
+    this.sprite.setVelocity(0, 0);
+    this.sprite.setPosition(spawnPoint.x, spawnPoint.y, 0, 0);
 
     setTimeout(() => {
+      // fix a bug where physics engine overwrites the velocity
       this.sprite.setVelocity(0, 0);
       this.sprite.setPosition(spawnPoint.x, spawnPoint.y, 0, 0);
     }, 0);
