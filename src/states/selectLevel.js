@@ -36,8 +36,8 @@ export default class SelectLevel extends Phaser.Scene {
 
       const levelOption = this.add
         .text(x, y, i + 1, {
-          fontSize: 20,
-          padding: 12,
+          fontSize: 26,
+          padding: 16,
           color: 'yellow',
           backgroundColor: '#777777',
         })
