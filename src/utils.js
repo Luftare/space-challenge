@@ -22,3 +22,8 @@ export const mockIo = () => ({
     engine: { id: 0 },
   },
 });
+
+export const formatTime = timeInMs => {
+  const seconds = timeInMs / 1000;
+  return `${seconds}s`;
+};

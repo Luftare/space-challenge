@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { characters } from './boot';
+import { formatTime } from '../utils';
 
 let socket;
 let playerScores;
@@ -22,7 +23,9 @@ export default class GameScene extends Phaser.Scene {
     socket = window.globalContext.socket;
     socket.removeAllListeners();
     playerScores = data.playerScores;
+    this.topScores = data.topScores;
 
+    console.log(playerScores, this.topScores);
     socket.on('START_GAME', ({ levelIndex }) => {
       this.scene.start('game', { levelIndex });
     });
@@ -30,36 +33,47 @@ export default class GameScene extends Phaser.Scene {
 
   create() {
     const { width, height } = this.game.scale;
+    const recordScore = this.topScores[0];
 
     this.add
-      .text(width * 0.5, 50, 'Score', {
+      .text(width * 0.5, 50, 'Leaderboard', {
         fontSize: 40,
       })
       .setOrigin(0.5, 0.5);
 
-    const fastestPlayer = playerScores
-      .filter(p => p.totalTime > 0)
-      .sort((a, b) => a.totalTime - b.totalTime)[0];
+    this.topScores.forEach((topScore, i) => {
+      const isNewRecord = playerScores.some(
+        p => p.name === topScore.name && p.totalTime === topScore.time
+      );
 
-    const formattedFastestPlayerTime =
-      Math.round(fastestPlayer.totalTime / 10) / 100;
+      const scoreRow = this.add
+        .text(
+          width * 0.5,
+          100 + i * 24,
+          `${topScore.name}: ${formatTime(topScore.time)}`,
+          {
+            fontSize: 24,
+            color: isNewRecord ? 'yellow' : 'white',
+          }
+        )
+        .setOrigin(0.5, 0.5);
 
-    this.add
-      .text(
-        width * 0.5,
-        100,
-        `Best time: ${formattedFastestPlayerTime}s by ${fastestPlayer.name}`,
-        {
-          fontSize: 22,
-        }
-      )
-      .setOrigin(0.5, 0.5);
+      if (isNewRecord) {
+        this.add.tween({
+          targets: scoreRow,
+          scale: 1.2,
+          yoyo: true,
+          duration: 500,
+          repeat: -1,
+        });
+      }
+    });
 
     playerScores
       .sort((a, b) => b.totalScore - a.totalScore)
       .forEach((player, position) => {
         const x = width * 0.1;
-        const y = 150 + position * 50;
+        const y = 250 + position * 50;
         this.add
           .text(x + 50, y, `${player.name}: ${player.totalScore}`, {
             fontSize: 30,

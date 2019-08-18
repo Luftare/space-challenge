@@ -107,9 +107,9 @@ export default class ClientConnection {
       this.game.scene.start('game', { levelIndex });
     });
 
-    socket.on('GAME_OVER', playerScores => {
+    socket.on('GAME_OVER', ({ players: playerScores, topScores }) => {
       this.game.rocket.depart(() => {
-        this.game.scene.start('score', { playerScores });
+        this.game.scene.start('score', { playerScores, topScores });
       });
     });
   }

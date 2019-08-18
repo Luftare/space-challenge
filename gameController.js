@@ -10,11 +10,14 @@ let lastLevelIndex = levelIndex;
 let levelsBuffer = [levelIndex];
 const LEVELS_BUFFER_LENGTH = Math.floor(LEVEL_COUNT * 0.7);
 let io;
+let db;
 
 const sleep = time => new Promise(res => setTimeout(res, time));
 
-const initGame = _io => {
+const initGame = (_io, _db) => {
   io = _io;
+  db = _db;
+
   setInterval(() => {
     io.sockets.emit('STATE_UPDATE', { players, levelIndex });
   }, 30);
@@ -102,32 +105,45 @@ function handlePlayerReachGoal(id, totalTime) {
 function handleGameOver() {
   clearInterval(countDownInterval || 0);
 
-  players
+  const finishedPLayers = players
     .filter(player => player.finished)
     .sort((a, b) => a.totalTime - b.totalTime)
-    .forEach((player, position) => {
+    .map((player, position) => {
       const receivedScore = Math.max(0, 100 - position * 25);
       player.lastScore = receivedScore;
       player.totalScore += receivedScore;
+      return player;
     });
 
-  io.sockets.emit('GAME_OVER', players);
+  db.getTopScoreLimit(levelIndex).then(maxTime => {
+    const topScorePlayers = finishedPLayers.filter(p => p.totalScore < maxTime);
+    const topScorePlayersModels = topScorePlayers.map(p => ({
+      name: p.name,
+      time: p.totalTime,
+      levelIndex,
+    }));
+    db.addTopScores(topScorePlayersModels)
+      .then(() => db.getLevelTops(levelIndex))
+      .then(topScores => {
+        io.sockets.emit('GAME_OVER', { players, topScores });
 
-  setTimeout(() => {
-    console.log('NEW GAME!');
-    countDownInterval = false;
-    countDown = COUNTDOWN_START;
+        setTimeout(() => {
+          console.log('NEW GAME!');
+          countDownInterval = false;
+          countDown = COUNTDOWN_START;
 
-    players.forEach(player => {
-      player.totalTime = 0;
-      player.finished = false;
-      player.lastScore = 0;
-    });
+          players.forEach(player => {
+            player.totalTime = 0;
+            player.finished = false;
+            player.lastScore = 0;
+          });
 
-    levelIndex = generateNewLevelIndex();
+          levelIndex = generateNewLevelIndex();
 
-    io.sockets.emit('START_GAME', { levelIndex });
-  }, 8000);
+          io.sockets.emit('START_GAME', { levelIndex });
+        }, 12000);
+      });
+  });
 }
 
 function generateNewLevelIndex() {
