@@ -77,6 +77,12 @@ export default class GameScene extends Phaser.Scene {
     this.input.keyboard.on('keyup-P', () => {
       this.handleRightInputUp();
     });
+
+    if (this.solo) {
+      this.input.keyboard.on('keydown-R', () => {
+        this.handleReset();
+      });
+    }
   }
 
   flashMessage(text) {
@@ -139,7 +145,7 @@ export default class GameScene extends Phaser.Scene {
         .setScrollFactor(0)
         .setInteractive()
         .on('pointerdown', () => {
-          this.player.respawn(this.spawnPoint);
+          this.handleReset();
         });
     } else {
       this.input.keyboard.on('keydown', e => {
@@ -288,6 +294,11 @@ export default class GameScene extends Phaser.Scene {
 
   handleRightInputUp() {
     this.player.rocketing = false;
+  }
+
+  handleReset() {
+    if (this.player.spawning) return;
+    this.player.respawn(this.spawnPoint);
   }
 
   decodeLevel(level) {
