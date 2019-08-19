@@ -122,6 +122,7 @@ function handleGameOver() {
       time: p.totalTime,
       levelIndex,
     }));
+
     db.addTopScores(topScorePlayersModels)
       .then(() => db.getLevelTops(levelIndex))
       .then(topScores => {
@@ -141,7 +142,7 @@ function handleGameOver() {
           levelIndex = generateNewLevelIndex();
 
           io.sockets.emit('START_GAME', { levelIndex });
-        }, 12000);
+        }, 812000);
       });
   });
 }

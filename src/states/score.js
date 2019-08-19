@@ -67,23 +67,38 @@ export default class GameScene extends Phaser.Scene {
       }
     });
 
+    const topScore = this.topScores[0];
+
     playerScores
       .sort((a, b) => b.totalScore - a.totalScore)
       .forEach((player, position) => {
         const x = width * 0.1;
         const y = 250 + position * 50;
+
         this.add
-          .text(x + 50, y, `${player.name}: ${player.totalScore}`, {
-            fontSize: 30,
+          .text(x + 30, y, `${player.name}: ${player.totalScore}p`, {
+            fontSize: 24,
           })
           .setOrigin(0, 0.5);
 
         if (player.lastScore > 0) {
-          const x = width - 50;
+          const x = width - 40;
           this.add
-            .text(x, y, `+${player.lastScore}`, {
-              fontSize: 30,
+            .text(x, y, `+${player.lastScore}p`, {
+              fontSize: 24,
               color: 'yellow',
+            })
+            .setOrigin(1, 0.5);
+        }
+
+        const shouldDisplayDelta = topScore && player.finished;
+
+        if (shouldDisplayDelta) {
+          const x = width - 140;
+          this.add
+            .text(x, y, `+${formatTime(player.totalTime - topScore.time)}`, {
+              fontSize: 24,
+              color: 'red',
             })
             .setOrigin(1, 0.5);
         }
