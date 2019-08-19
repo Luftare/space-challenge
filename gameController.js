@@ -11,10 +11,14 @@ let levelsBuffer = [levelIndex];
 const LEVELS_BUFFER_LENGTH = Math.floor(LEVEL_COUNT * 0.7);
 let io;
 let db;
+let gameRunning = false;
 
 const sleep = time => new Promise(res => setTimeout(res, time));
 
 const initGame = (_io, _db) => {
+  if (gameRunning) return;
+  gameRunning = true;
+
   io = _io;
   db = _db;
 
