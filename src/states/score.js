@@ -25,7 +25,6 @@ export default class GameScene extends Phaser.Scene {
     playerScores = data.playerScores;
     this.topScores = data.topScores;
 
-    console.log(playerScores, this.topScores);
     socket.on('START_GAME', ({ levelIndex }) => {
       this.scene.start('game', { levelIndex });
     });
@@ -33,7 +32,6 @@ export default class GameScene extends Phaser.Scene {
 
   create() {
     const { width, height } = this.game.scale;
-    const recordScore = this.topScores[0];
 
     this.add
       .text(width * 0.5, 50, 'Leaderboard', {

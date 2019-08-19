@@ -24,15 +24,21 @@ class Db {
     });
   }
 
-  getLevelTops(levelIndex = 0) {
-    return new Promise(res => {
-      this.collection
-        .find({ levelIndex })
-        .sort({ time: 1 })
-        .limit(5)
-        .toArray()
-        .then(res);
-    });
+  getLevelTops(levelIndex) {
+    return this.collection
+      .aggregate([
+        { $match: { levelIndex } },
+        {
+          $group: {
+            _id: '$name',
+            time: { $min: '$time' },
+            name: { $first: '$name' },
+          },
+        },
+      ])
+      .sort({ time: 1 })
+      .limit(5)
+      .toArray();
   }
 
   getTopScoreLimit(levelIndex) {
