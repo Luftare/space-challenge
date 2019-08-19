@@ -50,8 +50,8 @@ const initGame = (_io, _db) => {
       }
     });
 
-    socket.on('PLAYER_REACH_GOAL', ({ totalTime }) => {
-      handlePlayerReachGoal(socket.id, totalTime);
+    socket.on('PLAYER_REACH_GOAL', ({ time }) => {
+      handlePlayerReachGoal(socket.id, time);
     });
 
     socket.on('PLAYER_HIT_BLACK_HOLE', ({ x, y }) => {
@@ -63,7 +63,7 @@ const initGame = (_io, _db) => {
 function generatePlayer(id, name, characterIndex, score = 0) {
   return {
     finished: false,
-    totalTime: 0,
+    time: 0,
     totalScore: score,
     lastScore: 0,
     d: 1,
@@ -77,10 +77,10 @@ function generatePlayer(id, name, characterIndex, score = 0) {
   };
 }
 
-function handlePlayerReachGoal(id, totalTime) {
+function handlePlayerReachGoal(id, time) {
   const player = players.find(p => p.id === id);
   if (!player) return;
-  player.totalTime = totalTime;
+  player.time = time;
   player.finished = true;
 
   io.sockets.emit('PLAYER_REACH_GOAL', player);
@@ -107,7 +107,7 @@ function handleGameOver() {
 
   const finishedPLayers = players
     .filter(player => player.finished)
-    .sort((a, b) => a.totalTime - b.totalTime)
+    .sort((a, b) => a.time - b.time)
     .map((player, position) => {
       const receivedScore = Math.max(0, 100 - position * 25);
       player.lastScore = receivedScore;
@@ -119,7 +119,7 @@ function handleGameOver() {
     const topScorePlayers = finishedPLayers.filter(p => p.totalScore < maxTime);
     const topScorePlayersModels = topScorePlayers.map(p => ({
       name: p.name,
-      time: p.totalTime,
+      time: p.time,
       levelIndex,
     }));
 
@@ -134,7 +134,7 @@ function handleGameOver() {
           countDown = COUNTDOWN_START;
 
           players.forEach(player => {
-            player.totalTime = 0;
+            player.time = 0;
             player.finished = false;
             player.lastScore = 0;
           });

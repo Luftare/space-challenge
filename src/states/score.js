@@ -41,7 +41,7 @@ export default class GameScene extends Phaser.Scene {
 
     this.topScores.forEach((topScore, i) => {
       const isNewRecord = playerScores.some(
-        p => p.name === topScore.name && p.totalTime === topScore.time
+        p => p.name === topScore.name && p.time === topScore.time
       );
 
       const scoreRow = this.add
@@ -96,7 +96,7 @@ export default class GameScene extends Phaser.Scene {
         if (shouldDisplayDelta) {
           const x = width - 140;
           this.add
-            .text(x, y, `+${formatTime(player.totalTime - topScore.time)}`, {
+            .text(x, y, `+${formatTime(player.time - topScore.time)}`, {
               fontSize: 24,
               color: 'red',
             })

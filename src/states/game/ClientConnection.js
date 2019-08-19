@@ -114,8 +114,8 @@ export default class ClientConnection {
     });
   }
 
-  handlePlayerReachGoal(totalTime) {
-    this.socket.emit('PLAYER_REACH_GOAL', { totalTime });
+  handlePlayerReachGoal(time) {
+    this.socket.emit('PLAYER_REACH_GOAL', { time });
   }
 
   handlePlayerHitBlackHole(x, y) {

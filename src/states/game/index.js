@@ -220,13 +220,13 @@ export default class GameScene extends Phaser.Scene {
         this.player.sprite.setVelocity(0);
         if (!this.player.finished) {
           this.player.finished = true;
-          const totalTime = this.player.getTotalTime();
+          const time = this.player.getTotalTime();
           if (this.solo) {
             this.player.respawn(this.spawnPoint);
-            const seconds = Math.floor(totalTime / 10) / 100;
+            const seconds = Math.floor(time / 10) / 100;
             this.flashMessage(`${seconds}s`);
           } else {
-            this.connection.handlePlayerReachGoal(totalTime);
+            this.connection.handlePlayerReachGoal(time);
           }
         }
       }
