@@ -42,23 +42,18 @@ class Db {
   }
 
   getTopScoreLimit(levelIndex) {
-    return new Promise(res => {
-      this.getLevelTops(levelIndex).then(topScores => {
-        const weakestTopScore = topScores[topScores.length - 1];
-        const weakestTime = weakestTopScore ? weakestTopScore.time : Infinity;
-        res(weakestTime);
-      });
+    return this.getLevelTops(levelIndex).then(topScores => {
+      const weakestTopScore = topScores[topScores.length - 1];
+      return weakestTopScore ? weakestTopScore.time : Infinity;
     });
   }
 
   addTopScores(topScores) {
-    return new Promise(res => {
-      this.collection.insertMany(topScores, res);
-    });
+    return this.collection.insertMany(topScores);
   }
 
   permanentlyClearAll() {
-    this.collection.deleteMany({});
+    return this.collection.deleteMany({});
   }
 }
 
