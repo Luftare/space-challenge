@@ -142,7 +142,7 @@ function handleGameOver() {
           levelIndex = generateNewLevelIndex();
 
           io.sockets.emit('START_GAME', { levelIndex });
-        }, 812000);
+        }, 12000);
       });
   });
 }
