@@ -4,12 +4,30 @@
   rel="stylesheet"
   href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.7.6/c3.min.css"
 />
-<h3>Top 3 ranks and players</h3>
-<div id="top-rankings"></div>
-<h3>All levels played: cumulative time</h3>
-<div id="cumulative-time"></div>
-<h3>Level times and players</h3>
-<div id="times"></div>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+  }
+  h1 {
+    background: #000;
+    color: yellow;
+    padding: 12px;
+  }
+
+  main {
+    margin: 8px;
+  }
+</style>
+<h1>Space dash-board</h1>
+<main>
+  <h3>Top 3 ranks and players</h3>
+  <div id="top-rankings"></div>
+  <h3>All levels played: cumulative time</h3>
+  <div id="cumulative-time"></div>
+  <h3>Level times and players</h3>
+  <div id="times"></div>
+</main>
 <script src="transforms.js"></script>
 <script>
   fetch('/api/scores')
