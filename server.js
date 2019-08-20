@@ -1,6 +1,7 @@
 require('dotenv').config();
 const { initGame } = require('./gameController');
 const express = require('express');
+const api = express.Router();
 const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http, {
@@ -11,7 +12,23 @@ const io = require('socket.io')(http, {
 const db = require('./db');
 const port = process.env.PORT || 8000;
 
+app.use('/api', api);
 app.use('/', express.static(__dirname + '/dist'));
+
+api.get('/scores', async (req, res) => {
+  try {
+    const rawScores = await db.getAllScores();
+    const sanitizedScores = rawScores.map(({ name, time, levelIndex }) => ({
+      name,
+      time,
+      levelIndex,
+    }));
+
+    res.json(sanitizedScores);
+  } catch (e) {
+    res.sendStatus(500);
+  }
+});
 
 db.connect().then(async () => {
   initGame(io, db);
