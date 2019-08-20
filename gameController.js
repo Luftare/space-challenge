@@ -119,36 +119,34 @@ function handleGameOver() {
       return player;
     });
 
-  db.getTopScoreLimit(levelIndex).then(maxTime => {
-    const topScorePlayers = finishedPLayers.filter(p => p.totalScore < maxTime);
-    const topScorePlayersModels = topScorePlayers.map(p => ({
-      name: p.name,
-      time: p.time,
-      levelIndex,
-    }));
+  const playerScores = finishedPLayers.map(p => ({
+    name: p.name,
+    time: p.time,
+    levelIndex,
+  }));
 
-    db.addTopScores(topScorePlayersModels)
-      .then(() => db.getLevelTops(levelIndex))
-      .then(topScores => {
-        io.sockets.emit('GAME_OVER', { players, topScores });
+  db.addScores(playerScores)
+    .then(() => db.getLevelTops(levelIndex))
+    .then(topScores => {
+      io.sockets.emit('GAME_OVER', { players, topScores });
 
-        setTimeout(() => {
-          console.log('NEW GAME!');
-          countDownInterval = false;
-          countDown = COUNTDOWN_START;
+      setTimeout(() => {
+        console.log('NEW GAME!');
+        countDownInterval = false;
+        countDown = COUNTDOWN_START;
 
-          players.forEach(player => {
-            player.time = 0;
-            player.finished = false;
-            player.lastScore = 0;
-          });
+        players.forEach(player => {
+          player.time = 0;
+          player.finished = false;
+          player.lastScore = 0;
+        });
 
-          levelIndex = generateNewLevelIndex();
+        levelIndex = generateNewLevelIndex();
 
-          io.sockets.emit('START_GAME', { levelIndex });
-        }, 12000);
-      });
-  });
+        io.sockets.emit('START_GAME', { levelIndex });
+      }, 12000);
+    })
+    .catch(console.log);
 }
 
 function generateNewLevelIndex() {

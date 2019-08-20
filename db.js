@@ -1,5 +1,4 @@
 const MongoClient = require('mongodb').MongoClient;
-const LEADERBOARD_COLLECTION_NAME = 'space-dash-leaderboard';
 
 const mongoDbConfig = {
   useNewUrlParser: true,
@@ -17,7 +16,7 @@ class Db {
         (err, client) => {
           if (err) return console.log(err);
           this.db = client.db();
-          this.collection = this.db.collection(LEADERBOARD_COLLECTION_NAME);
+          this.collection = this.db.collection(process.env.MONGODB_COLLECTION);
           res();
         }
       );
@@ -41,15 +40,19 @@ class Db {
       .toArray();
   }
 
-  getTopScoreLimit(levelIndex) {
-    return this.getLevelTops(levelIndex).then(topScores => {
-      const weakestTopScore = topScores[topScores.length - 1];
-      return weakestTopScore ? weakestTopScore.time : Infinity;
-    });
-  }
-
-  addTopScores(topScores) {
-    return this.collection.insertMany(topScores);
+  addScores(scores) {
+    const updateOperations = scores.reduce(
+      (promises, { levelIndex, name, time }) => [
+        ...promises,
+        this.collection.updateOne(
+          { levelIndex, name },
+          { $min: { time } },
+          { upsert: true }
+        ),
+      ],
+      []
+    );
+    return Promise.all(updateOperations);
   }
 
   permanentlyClearAll() {
