@@ -63,6 +63,10 @@ class Db {
     return this.collection.deleteMany({});
   }
 
+  deletePlayerDocuments(name) {
+    return this.collection.deleteMany({ name });
+  }
+
   async removeObsoleteScoreDocuments() {
     const scores = await this.collection.find({}).toArray();
     const startCount = scores.length;

@@ -1,0 +1,72 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.10.0/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.7.6/c3.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.7.6/c3.min.css"
+/>
+<h3>Top 3 ranks and players</h3>
+<div id="top-rankings"></div>
+<h3>All levels played: cumulative time</h3>
+<div id="cumulative-time"></div>
+<h3>Level times and players</h3>
+<div id="times"></div>
+<script src="transforms.js"></script>
+<script>
+  fetch('/api/scores')
+    .then(x => x.json())
+    .then(scores => {
+      c3.generate({
+        bindto: '#times',
+        data: {
+          type: 'line',
+          columns: allPlayersLevelTimes(scores),
+        },
+        axis: {
+          x: {
+            label: 'Level',
+            tick: {
+              format: x => `${x + 1}`,
+            },
+          },
+          y: {
+            label: 'Time (s)',
+          },
+        },
+      });
+
+      c3.generate({
+        bindto: '#cumulative-time',
+        data: {
+          type: 'bar',
+          columns: playersTotalTimes(scores).sort((a, b) => a[1] - b[1]),
+        },
+        axis: {
+          x: {
+            show: false,
+          },
+          y: {
+            label: 'Time (s)',
+          },
+        },
+      });
+
+      c3.generate({
+        bindto: '#top-rankings',
+        data: {
+          type: 'bar',
+          columns: allPlayersTopRankings(scores).sort((a, b) => b[1] - a[1]),
+        },
+        axis: {
+          x: {
+            label: 'Rank#',
+            tick: {
+              format: x => `#${x + 1}`,
+            },
+          },
+          y: {
+            label: 'number of ranks',
+          },
+        },
+      });
+    });
+</script>

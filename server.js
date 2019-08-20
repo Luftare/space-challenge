@@ -14,6 +14,7 @@ const port = process.env.PORT || 8000;
 
 app.use('/api', api);
 app.use('/', express.static(__dirname + '/dist'));
+app.use('/analytics', express.static(__dirname + '/analytics'));
 
 api.get('/scores', async (req, res) => {
   try {
