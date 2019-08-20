@@ -304,8 +304,8 @@ export default class GameScene extends Phaser.Scene {
   decodeLevel(level) {
     level.tiles.forEach((row, gridY) => {
       row.forEach((value, gridX) => {
-        const x = (gridX + 0.5) * GRID_SIZE;
-        const y = -(gridY + 0.5) * GRID_SIZE;
+        const x = Math.floor((gridX + 0.5) * GRID_SIZE);
+        const y = Math.floor(-(gridY + 0.5) * GRID_SIZE);
 
         if (value === obstacleMap._) return;
 
