@@ -164,4 +164,4 @@ function generateNewLevelIndex() {
   return newLevelIndex;
 }
 
-module.exports = { initGame };
+module.exports = { initGame, LEVEL_COUNT };
