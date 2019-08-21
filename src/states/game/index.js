@@ -8,7 +8,6 @@ import Rocket from './Rocket';
 import ClientConnection from './ClientConnection';
 import { mockIo } from '../../utils';
 import { smallButtonStyle, cornerOffset } from '../style';
-const { LEVEL_COUNT } = require('../../../gameController');
 
 const GRAVITY = 300;
 const GRID_SIZE = 60;
@@ -314,8 +313,8 @@ export default class GameScene extends Phaser.Scene {
     if (this.player.spawning) return;
     let nextLevel = this.levelIndex + next
     if (nextLevel < 0) {
-      nextLevel = LEVEL_COUNT - 1;
-    } else if (nextLevel === LEVEL_COUNT) {
+      nextLevel = levels.length - 1;
+    } else if (nextLevel === levels.length) {
       nextLevel = 0;
     }
     this.scene.start('game', { levelIndex: nextLevel, solo: true });
