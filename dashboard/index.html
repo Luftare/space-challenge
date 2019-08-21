@@ -37,6 +37,10 @@
         bindto: '#times',
         data: {
           type: 'line',
+          onclick: ({ x }) => {
+            const url = `/?level=${x}`;
+            window.open(url, '_blank');
+          },
           columns: allPlayersLevelTimes(scores),
         },
         axis: {

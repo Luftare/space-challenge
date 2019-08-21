@@ -6,7 +6,10 @@ import LoginState from './states/login';
 import SelectLevel from './states/selectLevel';
 import { isMobileDevice, mockIo } from './utils';
 
-const levelEditMode = process.env.NODE_ENV === 'level_edit';
+const levelIndex = parseInt(
+  new URLSearchParams(window.location.search).get('level')
+);
+const soloMode = !isNaN(levelIndex);
 const PLAYER_NAME_KEY = 'space-dash-name';
 
 const mobile = isMobileDevice();
@@ -89,7 +92,7 @@ document.getElementById('submit').addEventListener('click', () => {
       localStorage.setItem(PLAYER_NAME_KEY, name);
     }
     window.globalContext = {
-      levelEditMode,
+      soloMode,
       socket: null,
       name,
       character: {},
@@ -104,12 +107,13 @@ document.getElementById('submit').addEventListener('click', () => {
   }
 });
 
-if (levelEditMode) {
+if (soloMode) {
   document.getElementById('login').style.display = 'none';
   document.getElementById('game-root').hidden = false;
 
   window.globalContext = {
-    levelEditMode,
+    soloMode,
+    soloModeLevelIndex: levelIndex || 0,
     socket: mockIo(),
     name: 'tester',
     character: characters[0],

@@ -170,8 +170,10 @@ export default class BootScene extends Phaser.Scene {
       yoyo: true,
     });
 
-    if (window.globalContext.levelEditMode) {
-      this.scene.start('selectLevel');
+    if (window.globalContext.soloMode) {
+      this.scene.start('game', {
+        levelIndex: window.globalContext.soloModeLevelIndex,
+      });
     } else {
       this.scene.start('login');
     }

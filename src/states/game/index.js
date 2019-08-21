@@ -31,7 +31,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   init(data) {
-    this.solo = data.solo || window.globalContext.levelEditMode;
+    this.solo = data.solo || window.globalContext.soloMode;
     this.character = window.globalContext.character;
     this.levelIndex = data.levelIndex;
     this.level = levels[data.levelIndex];

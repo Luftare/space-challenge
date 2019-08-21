@@ -8,8 +8,8 @@
     "dev:client": "parcel serve src/index.html",
     "build": "parcel build src/index.html",
     "postinstall": "npm run build",
-    "dev:server": "NODE_ENV=dev_server nodemon  --ignore './dist/' server.js",
-    "dev:level": "NODE_ENV=level_edit parcel serve src/index.html"
+    "dev:server": "nodemon  --ignore './dist/' server.js",
+    "dev:level": "parcel serve src/index.html"
   },
   "keywords": [],
   "author": "",
