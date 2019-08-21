@@ -9,6 +9,7 @@
     margin: 0;
     padding: 0;
   }
+
   h1 {
     background: #000;
     color: yellow;
@@ -27,6 +28,8 @@
   <div id="cumulative-time"></div>
   <h3>Level times and players</h3>
   <div id="times"></div>
+  <h3>Best time diff to second best</h3>
+  <div id="deltas"></div>
 </main>
 <script src="transforms.js"></script>
 <script>
@@ -86,7 +89,31 @@
             },
           },
           y: {
-            label: 'number of ranks',
+            label: 'Number of ranks',
+          },
+        },
+      });
+
+      console.log(toHighscoreDeltas(scores));
+      c3.generate({
+        bindto: '#deltas',
+        data: {
+          type: 'bar',
+          columns: [toHighscoreDeltas(scores)],
+          onclick: ({ x }) => {
+            const url = `/?level=${x}`;
+            window.open(url, '_blank');
+          },
+        },
+        axis: {
+          x: {
+            label: 'Level #',
+            tick: {
+              format: x => `${x + 1}`,
+            },
+          },
+          y: {
+            label: 'Best time delta (ms)',
           },
         },
       });

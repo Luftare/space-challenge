@@ -102,3 +102,26 @@ function getScoreRanking({ name, levelIndex, time }, scores) {
     .filter(s => s.levelIndex === levelIndex)
     .filter(s => s.time < time).length;
 }
+
+function toHighscoreDeltas(scores) {
+  const levelCount = toLevelCount(scores);
+  const deltas = arrayOf(levelCount).map((_, levelIndex) => {
+    const topScore = getScoreAtRank(levelIndex, 0, scores);
+    const secondsScore = getScoreAtRank(levelIndex, 1, scores);
+    if (topScore && secondsScore) {
+      return secondsScore.time - topScore.time;
+    } else {
+      return 0;
+    }
+  });
+
+  return ['delta', ...deltas];
+}
+
+function getScoreAtRank(levelIndex, rank, scores) {
+  return scores
+    .filter(s => s.levelIndex === levelIndex)
+    .filter((s, i, levelScores) => {
+      return levelScores.filter(n => n.time < s.time).length === rank;
+    })[0];
+}
