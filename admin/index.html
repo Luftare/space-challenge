@@ -1,34 +1,111 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js"
+  defer
+></script>
+<script src="admin.js" defer></script>
 <style>
-  #password {
-    background: yellow;
-    font-size: 36px;
+  body {
+    min-width: 500px;
   }
 
-  #players {
-    display: block;
-    width: 400px;
-    margin-top: 32px;
+  .split {
+    display: grid;
+    grid-template-columns: 50% 50%;
   }
 
-  #players > div {
-    padding: 16px 0px;
-    display: flex;
-    justify-content: space-between;
-    border-bottom: solid #999 1px;
-    font-size: 18px;
+  table {
+    width: 100%;
+    border-spacing: unset;
   }
 
-  #players button {
-    color: red;
+  th {
+    text-align: left;
+  }
+
+  tr {
+    cursor: pointer;
+  }
+
+  tr:hover:not(:first-child) {
+    background-color: #eee;
+  }
+
+  .form {
+    display: grid;
+    grid-gap: 16px;
+    grid-template-columns: repeat(auto-fit, 1fr);
+  }
+
+  .level-selector {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(30px, 1fr));
+  }
+
+  .level-selector > span {
+    padding: 4px;
+    background-color: lightgrey;
+    margin: 2px;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .level-selector > .active {
+    background-color: yellow;
   }
 </style>
-
-<input type="password" id="password" placeholder="password" />
-<div id="admin" hidden>
-  <h4>Players:</h4>
-  <div id="players"></div>
-  <h4>Log:</h4>
-  <div id="logs"></div>
-</div>
-
-<script src="main.js"></script>
+<body>
+  <div id="root">
+    <h4>Login</h4>
+    <input v-model="password" type="password" />
+    <div class="split">
+      <div>
+        <h4>Rooms</h4>
+        <table>
+          <tr>
+            <th>Name</th>
+            <th>published</th>
+            <th>levels</th>
+          </tr>
+          <tr v-for="room in rooms" @click="selectRoom(room)">
+            <td>{{ room.name }}</td>
+            <td>{{ room.published ? 'yes' : 'no' }}</td>
+            <td>{{ room.levels.length }}</td>
+          </tr>
+        </table>
+      </div>
+      <div class="form">
+        <h4>Create room</h4>
+        <input v-model="newRoomName" placeholder="name" />
+        <label>
+          <input v-model="newRoomPublished" type="checkbox" />
+          Published
+        </label>
+        <div>
+          {{ selectedLevelsCount }} levels
+          <button @click="resetLevelSelections">reset</button>
+        </div>
+        <div class="level-selector">
+          <span
+            v-for="levelOption in levelOptions"
+            @click="toggleLevelOption(levelOption)"
+            :class="{ active: levelOption.selected }"
+          >
+            {{ levelOption.index + 1 }}
+          </span>
+        </div>
+        <div class="split">
+          <button @click="saveRoom" type="submit">Submit</button>
+          <button @click="deleteSelectedRoom" style="color: red;">
+            Delete {{ newRoomName }}
+          </button>
+        </div>
+      </div>
+    </div>
+    <h4>Users</h4>
+    <div v-for="name in playerNames">
+      <span>{{ name }}</span>
+      <button @click="deleteUserByName(name)">delete</button>
+    </div>
+  </div>
+</body>

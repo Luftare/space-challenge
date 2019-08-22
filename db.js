@@ -1,4 +1,5 @@
 const MongoClient = require('mongodb').MongoClient;
+const ObjectId = require('mongodb').ObjectId;
 
 const mongoDbConfig = {
   useNewUrlParser: true,
@@ -16,7 +17,8 @@ class Db {
         (err, client) => {
           if (err) return console.log(err);
           this.db = client.db();
-          this.collection = this.db.collection(process.env.MONGODB_COLLECTION);
+          this.users = this.db.collection(process.env.MONGODB_COLLECTION);
+          this.rooms = this.db.collection(process.env.MONGODB_ROOMS_COLLECTION);
           res();
         }
       );
@@ -24,15 +26,15 @@ class Db {
   }
 
   getUserNames() {
-    return this.collection.distinct('name');
+    return this.users.distinct('name');
   }
 
   getAllScores() {
-    return this.collection.find({}).toArray();
+    return this.users.find({}).toArray();
   }
 
   getLevelTops(levelIndex) {
-    return this.collection
+    return this.users
       .aggregate([
         { $match: { levelIndex } },
         {
@@ -52,7 +54,7 @@ class Db {
     const updateOperations = scores.reduce(
       (promises, { levelIndex, name, time }) => [
         ...promises,
-        this.collection.updateOne(
+        this.users.updateOne(
           { levelIndex, name },
           { $min: { time } },
           { upsert: true }
@@ -64,15 +66,15 @@ class Db {
   }
 
   permanentlyClearAll() {
-    return this.collection.deleteMany({});
+    return this.users.deleteMany({});
   }
 
   deletePlayerDocuments(name) {
-    return this.collection.deleteMany({ name });
+    return this.users.deleteMany({ name });
   }
 
   async removeObsoleteScoreDocuments() {
-    const scores = await this.collection.find({}).toArray();
+    const scores = await this.users.find({}).toArray();
     const startCount = scores.length;
 
     const clearedScores = scores.reduce((acc, score, i, scores) => {
@@ -94,12 +96,28 @@ class Db {
     const deletedCount = startCount - endCount;
 
     if (deletedCount > 0) {
-      await this.collection.deleteMany({});
-      await this.collection.insertMany(clearedScores);
+      await this.users.deleteMany({});
+      await this.users.insertMany(clearedScores);
       console.log(`Deleted ${deletedCount} obsolete documents.`);
     } else {
       console.log('No obsolete documents found.');
     }
+  }
+
+  getRooms() {
+    return this.rooms.find({}).toArray();
+  }
+
+  createRoom(room) {
+    return this.rooms.updateOne(
+      { name: room.name },
+      { $set: room },
+      { upsert: true }
+    );
+  }
+
+  deleteRoomByName(name) {
+    return this.rooms.deleteMany({ name });
   }
 }
 

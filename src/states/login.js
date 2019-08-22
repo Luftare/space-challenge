@@ -2,7 +2,7 @@ import io from 'socket.io-client';
 import { characters } from './boot';
 import { headlineStyle, headlineOffset } from './style';
 
-export default class BootScene extends Phaser.Scene {
+export default class LoginScene extends Phaser.Scene {
   constructor() {
     super({ key: 'login' });
   }
@@ -69,17 +69,7 @@ export default class BootScene extends Phaser.Scene {
       .setOrigin(0.5, 0.5)
       .setInteractive()
       .on('pointerdown', () => {
-        socket.on('START_GAME', ({ levelIndex }) => {
-          this.scene.start('game', { levelIndex });
-        });
-
-        socket.emit('LOGIN', {
-          name: window.globalContext.name,
-          characterIndex: characters.indexOf(window.globalContext.character),
-          score: window.globalContext.score,
-        });
-
-        this.challengeButton.setScale(0.0, 0.0);
+        this.scene.start('selectRoom');
       });
 
     this.add

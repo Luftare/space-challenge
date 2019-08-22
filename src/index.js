@@ -4,6 +4,7 @@ import GameState from './states/game';
 import ScoreState from './states/score';
 import LoginState from './states/login';
 import SelectLevel from './states/selectLevel';
+import SelectRoom from './states/selectRoom';
 import { isMobileDevice, mockIo } from './utils';
 
 const levelIndex = parseInt(
@@ -27,7 +28,14 @@ const gameConfig = {
   },
   pixelArt: true,
   title: 'Space dash',
-  scene: [BootState, LoginState, SelectLevel, GameState, ScoreState],
+  scene: [
+    BootState,
+    LoginState,
+    SelectRoom,
+    SelectLevel,
+    GameState,
+    ScoreState,
+  ],
 };
 
 function newGame() {

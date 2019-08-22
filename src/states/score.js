@@ -5,7 +5,7 @@ import { formatTime } from '../utils';
 let socket;
 let playerScores;
 
-export default class GameScene extends Phaser.Scene {
+export default class ScoreScene extends Phaser.Scene {
   constructor() {
     super({
       key: 'score',

@@ -20,6 +20,16 @@ app.use('/admin', express.static(__dirname + '/admin'));
 
 api.use(bodyParser.json());
 
+const requirePassword = (req, res, next) => {
+  const { password } = req.body;
+
+  if (process.env.ADMIN_PASSWORD && password === process.env.ADMIN_PASSWORD) {
+    next();
+  } else {
+    res.sendStatus(403);
+  }
+};
+
 api.get('/scores', async (req, res) => {
   try {
     const rawScores = await db.getAllScores();
@@ -39,22 +49,42 @@ api.get('/users', async (req, res) => {
   res.json(await db.getUserNames());
 });
 
-api.delete('/scores/:name', async (req, res) => {
-  const { password } = req.body;
+api.get('/rooms', async (req, res) => {
+  res.json(await db.getRooms());
+});
+
+api.post('/rooms', requirePassword, async (req, res) => {
+  const { room } = req.body;
+  console.log('UPDATING / CREATING ROOM:', room.name);
+  if (room.name) {
+    res.json(await db.createRoom(room));
+  } else {
+    res.sendStatus(400);
+  }
+});
+
+api.delete('/rooms/:name', requirePassword, async (req, res) => {
+  const { name } = req.params;
+  console.log('DELETING ROOM:', name);
+  await db.deleteRoomByName(name);
+  res.sendStatus(200);
+});
+
+api.delete('/scores/:name', requirePassword, async (req, res) => {
   const { name } = req.params;
 
-  if (name && process.env.PASSWORD && password === process.env.PASSWORD) {
+  if (name) {
     db.deletePlayerDocuments(name);
     res.sendStatus(200);
   } else {
-    res.sendStatus(403);
+    res.sendStatus(400);
   }
 });
 
 db.connect().then(async () => {
-  initGame(io, db);
-});
+  await initGame(io, db);
 
-http.listen(port, () => {
-  console.log(`Server listening to port: ${port}`);
+  http.listen(port, () => {
+    console.log(`Server listening to port: ${port}`);
+  });
 });
