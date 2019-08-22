@@ -13,21 +13,6 @@ import level11 from './level-11';
 import level12 from './level-12';
 import level13 from './level-13';
 import level14 from './level-14';
-import level15 from './level-15';
-import level16 from './level-16';
-import level17 from './level-17';
-import level18 from './level-18';
-import level19 from './level-19';
-import level20 from './level-20';
-import level21 from './level-21';
-import level22 from './level-22';
-import level23 from './level-23';
-import level24 from './level-24';
-import level25 from './level-25';
-import level26 from './level-26';
-import level27 from './level-27';
-import level28 from './level-28';
-import level29 from './level-29';
 
 module.exports = [
   level0,
@@ -45,19 +30,4 @@ module.exports = [
   level12,
   level13,
   level14,
-  level15,
-  level16,
-  level17,
-  level18,
-  level19,
-  level20,
-  level21,
-  level22,
-  level23,
-  level24,
-  level25,
-  level26,
-  level27,
-  level28,
-  level29,
 ];
