@@ -23,6 +23,10 @@ class Db {
     });
   }
 
+  getUserNames() {
+    return this.collection.distinct('name');
+  }
+
   getAllScores() {
     return this.collection.find({}).toArray();
   }

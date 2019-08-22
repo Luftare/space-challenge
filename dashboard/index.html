@@ -6,38 +6,62 @@
 />
 <style>
   body {
+    font-family: Montserrat, sans-serif, Arial, Helvetica;
     margin: 0;
     padding: 0;
   }
 
   h1 {
-    background: #000;
-    color: yellow;
-    padding: 12px;
+    background: #f9f9f9;
+    border-left: solid #fdc500 16px;
+    padding: 24px;
+    margin: 0;
+  }
+
+  h3 {
+    margin: 24px 8px;
   }
 
   main {
-    margin: 8px;
+    background: #eee;
+    padding: 0 32px;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    width: 100vw;
+    height: calc(100vh - 80px);
   }
 </style>
-<h1>Space dash-board</h1>
+<h1>SPACE DASH-BOARD</h1>
 <main>
-  <h3>Top 3 ranks and players</h3>
-  <div id="top-rankings"></div>
-  <h3>All levels played: cumulative time</h3>
-  <div id="cumulative-time"></div>
-  <h3>Level times and players</h3>
-  <div id="times"></div>
-  <h3>Best time diff to second best</h3>
-  <div id="deltas"></div>
+  <div>
+    <h3>Top 3 ranks and players</h3>
+    <div id="top-rankings"></div>
+  </div>
+  <div>
+    <h3>Level times and players</h3>
+    <div id="times"></div>
+  </div>
+  <div>
+    <h3>Best time diff to second best</h3>
+    <div id="deltas"></div>
+  </div>
+  <div>
+    <h3>All levels played: cumulative time</h3>
+    <div id="cumulative-time"></div>
+  </div>
 </main>
 <script src="transforms.js"></script>
 <script>
+  const size = { height: window.innerHeight * 0.5 - 140 };
+
   fetch('/api/scores')
     .then(x => x.json())
     .then(scores => {
       c3.generate({
         bindto: '#times',
+        size,
         data: {
           type: 'line',
           onclick: ({ x }) => {
@@ -61,6 +85,7 @@
 
       c3.generate({
         bindto: '#cumulative-time',
+        size,
         data: {
           type: 'bar',
           columns: playersTotalTimes(scores).sort((a, b) => a[1] - b[1]),
@@ -77,6 +102,7 @@
 
       c3.generate({
         bindto: '#top-rankings',
+        size,
         data: {
           type: 'bar',
           columns: allPlayersTopRankings(scores).sort((a, b) => b[1] - a[1]),
@@ -96,6 +122,7 @@
 
       c3.generate({
         bindto: '#deltas',
+        size,
         data: {
           type: 'bar',
           columns: [toHighscoreDeltas(scores)],
