@@ -3,7 +3,12 @@ export const characters = [
   { name: 'robot', fire: true, smoke: true, smokeTint: 0x555555 },
   { name: 'alien', fire: false, smoke: true, smokeTint: 0xad73ea },
   { name: 'duck', fire: false, smoke: true, smokeTint: 0x73d5ef },
-  { name: 'unicorn', fire: false, smoke: true, smokeTint: 0xffffff },
+  {
+    name: 'unicorn',
+    fire: false,
+    smoke: true,
+    smokeTint: [0xff7777, 0xff77ff, 0x77ff77, 0xffff77, 0x7777ff],
+  },
 ];
 
 export default class BootScene extends Phaser.Scene {
