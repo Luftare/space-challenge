@@ -3,6 +3,7 @@ export const characters = [
   { name: 'robot', fire: true, smoke: true, smokeTint: 0x555555 },
   { name: 'alien', fire: false, smoke: true, smokeTint: 0xad73ea },
   { name: 'duck', fire: false, smoke: true, smokeTint: 0x73d5ef },
+  { name: 'unicorn', fire: false, smoke: true, smokeTint: 0xffffff },
 ];
 
 export default class BootScene extends Phaser.Scene {
@@ -31,10 +32,16 @@ export default class BootScene extends Phaser.Scene {
       frameHeight: 55,
     });
 
+    this.load.spritesheet('unicorn', require(`../assets/unicorn.png`), {
+      frameWidth: 40,
+      frameHeight: 55,
+    });
+
     this.load.image('human-avatar', require('../assets/human-avatar.png'));
     this.load.image('robot-avatar', require('../assets/robot-avatar.png'));
     this.load.image('alien-avatar', require('../assets/alien-avatar.png'));
     this.load.image('duck-avatar', require('../assets/duck-avatar.png'));
+    this.load.image('unicorn-avatar', require('../assets/unicorn-avatar.png'));
 
     this.load.spritesheet('rocket', require('../assets/rocket.png'), {
       frameWidth: 60,

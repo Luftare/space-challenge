@@ -29,7 +29,7 @@ export default class BootScene extends Phaser.Scene {
     const centerX = width * 0.5;
     const centerY = height * 0.5;
     const topLeftCellX = centerX - 0.5 * characterGridWidth;
-    const topLeftCellY = centerY - 0.5 * characterGridWidth;
+    const topLeftCellY = centerY - 0.5 * characterGridWidth - 100;
 
     characters.forEach((character, i) => {
       const columns = 2;
