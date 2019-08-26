@@ -1,5 +1,6 @@
 require('dotenv').config();
 const { initGame } = require('./gameController');
+const bodyParser = require('body-parser');
 const express = require('express');
 const api = express.Router();
 const app = express();
@@ -15,6 +16,9 @@ const port = process.env.PORT || 8000;
 app.use('/api', api);
 app.use('/', express.static(__dirname + '/dist'));
 app.use('/dashboard', express.static(__dirname + '/dashboard'));
+app.use('/admin', express.static(__dirname + '/admin'));
+
+api.use(bodyParser.json());
 
 api.get('/scores', async (req, res) => {
   try {
@@ -28,6 +32,22 @@ api.get('/scores', async (req, res) => {
     res.json(sanitizedScores);
   } catch (e) {
     res.sendStatus(500);
+  }
+});
+
+api.get('/users', async (req, res) => {
+  res.json(await db.getUserNames());
+});
+
+api.delete('/scores/:name', async (req, res) => {
+  const { password } = req.body;
+  const { name } = req.params;
+
+  if (name && process.env.PASSWORD && password === process.env.PASSWORD) {
+    db.deletePlayerDocuments(name);
+    res.sendStatus(200);
+  } else {
+    res.sendStatus(403);
   }
 });
 
