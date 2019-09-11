@@ -7,6 +7,13 @@ let gameRunning = false;
 
 const sleep = time => new Promise(res => setTimeout(res, time));
 
+function getRoomOverviews() {
+  return rooms.map(room => ({
+    name: room.name,
+    players: room.players.map(p => p.name),
+  }));
+}
+
 function getTotalPlayersCount() {
   return rooms.reduce((sum, room) => sum + room.players.length, 0);
 }
@@ -36,7 +43,7 @@ const initGame = async (_io, _db) => {
     rooms.forEach(room => {
       room.updateClients();
     });
-  }, 100);
+  }, 30);
 
   io.sockets.on('connection', socket => {
     let room;
@@ -69,9 +76,7 @@ const initGame = async (_io, _db) => {
     });
 
     socket.on('GET_ROOMS', async callback => {
-      const rooms = await db.getRooms();
-      const publishedRooms = rooms.filter(room => room.published);
-      callback(publishedRooms);
+      callback(getRoomOverviews());
     });
 
     socket.on('PLAYER_REACH_GOAL', ({ time }) => {

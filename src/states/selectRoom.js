@@ -21,7 +21,7 @@ export default class SelectRoom extends Phaser.Scene {
     const { width, height } = this.game.scale;
 
     this.add
-      .text(width * 0.5, 50, 'Rooms', {
+      .text(width * 0.5, 50, 'Select room', {
         fontSize: 40,
       })
       .setOrigin(0.5, 0.5);
@@ -29,7 +29,7 @@ export default class SelectRoom extends Phaser.Scene {
     socket.emit('GET_ROOMS', rooms => {
       rooms.forEach((room, i) => {
         this.add
-          .text(20, 100 + i * 25, room.name, {
+          .text(20, 130 + i * 55, `${room.name} (${room.players.length})`, {
             fontSize: 32,
           })
           .setOrigin(0, 0.5)

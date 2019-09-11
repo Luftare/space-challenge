@@ -3,7 +3,7 @@ new Vue({
   data: {
     password: 'Msd3wf433dJjasdgffdssasL95fds',
     playerNames: [],
-    levelOptions: [...Array(30)].map((_, index) => ({
+    levelOptions: [...Array(31)].map((_, index) => ({
       selected: false,
       index,
     })),
