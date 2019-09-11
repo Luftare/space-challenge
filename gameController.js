@@ -11,6 +11,7 @@ function getRoomOverviews() {
   return rooms.map(room => ({
     name: room.name,
     players: room.players.map(p => p.name),
+    levels: room.levels,
   }));
 }
 
@@ -18,13 +19,7 @@ function getTotalPlayersCount() {
   return rooms.reduce((sum, room) => sum + room.players.length, 0);
 }
 
-const initGame = async (_io, _db) => {
-  if (gameRunning) return;
-  gameRunning = true;
-
-  io = _io;
-  db = _db;
-
+const refreshRooms = async () => {
   const roomModels = await db.getRooms();
   const publicRoomModels = roomModels.filter(room => room.published);
 
@@ -38,6 +33,16 @@ const initGame = async (_io, _db) => {
       });
     }
   });
+};
+
+const initGame = async (_io, _db) => {
+  if (gameRunning) return;
+  gameRunning = true;
+
+  io = _io;
+  db = _db;
+
+  await refreshRooms();
 
   setInterval(() => {
     rooms.forEach(room => {
@@ -90,4 +95,4 @@ const initGame = async (_io, _db) => {
   });
 };
 
-module.exports = { initGame };
+module.exports = { initGame, refreshRooms };

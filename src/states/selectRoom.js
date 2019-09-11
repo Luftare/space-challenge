@@ -1,7 +1,12 @@
 import Phaser from 'phaser';
 
 import { characters } from './boot';
-import { headlineStyle, headlineOffset } from './style';
+import {
+  headlineStyle,
+  headlineOffset,
+  cornerOffset,
+  smallButtonStyle,
+} from './style';
 
 let socket;
 
@@ -26,11 +31,21 @@ export default class SelectRoom extends Phaser.Scene {
       })
       .setOrigin(0.5, 0.5);
 
+    this.add
+      .text(cornerOffset.x, cornerOffset.y, 'back', smallButtonStyle)
+      .setOrigin(0.5, 0.5)
+      .setScrollFactor(0)
+      .setInteractive()
+      .on('pointerdown', () => {
+        this.scene.start('login');
+      });
+
     socket.emit('GET_ROOMS', rooms => {
       rooms.forEach((room, i) => {
         this.add
-          .text(20, 130 + i * 55, `${room.name} (${room.players.length})`, {
+          .text(20, 130 + i * 70, `${room.name}`, {
             fontSize: 32,
+            color: 'yellow',
           })
           .setOrigin(0, 0.5)
           .setInteractive()
@@ -48,6 +63,19 @@ export default class SelectRoom extends Phaser.Scene {
               score: window.globalContext.score,
             });
           });
+
+        this.add
+          .text(
+            20,
+            160 + i * 70,
+            `${room.levels.length} level${room.levels.length > 1 ? 's' : ''}, ${
+              room.players.length
+            } online`,
+            {
+              fontSize: 16,
+            }
+          )
+          .setOrigin(0, 0.5);
       });
     });
   }

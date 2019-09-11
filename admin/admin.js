@@ -1,7 +1,7 @@
 new Vue({
   el: '#root',
   data: {
-    password: 'Msd3wf433dJjasdgffdssasL95fds',
+    password: '',
     playerNames: [],
     levelOptions: [...Array(31)].map((_, index) => ({
       selected: false,
@@ -102,6 +102,15 @@ new Vue({
           this.refresh();
         })
         .catch(console.log);
+    },
+    pushChangesToGame() {
+      axios({
+        url: `/api/game`,
+        method: 'post',
+        data: {
+          password: this.password,
+        },
+      });
     },
   },
 });

@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { initGame } = require('./gameController');
+const { initGame, refreshRooms } = require('./gameController');
 const bodyParser = require('body-parser');
 const express = require('express');
 const api = express.Router();
@@ -55,7 +55,6 @@ api.get('/rooms', async (req, res) => {
 
 api.post('/rooms', requirePassword, async (req, res) => {
   const { room } = req.body;
-  console.log('UPDATING / CREATING ROOM:', room.name);
   if (room.name) {
     res.json(await db.createRoom(room));
   } else {
@@ -65,8 +64,12 @@ api.post('/rooms', requirePassword, async (req, res) => {
 
 api.delete('/rooms/:name', requirePassword, async (req, res) => {
   const { name } = req.params;
-  console.log('DELETING ROOM:', name);
   await db.deleteRoomByName(name);
+  res.sendStatus(200);
+});
+
+api.post('/game', requirePassword, async (req, res) => {
+  await refreshRooms();
   res.sendStatus(200);
 });
 
