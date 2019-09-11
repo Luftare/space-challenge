@@ -43,7 +43,7 @@ export default class SelectRoom extends Phaser.Scene {
     socket.emit('GET_ROOMS', rooms => {
       rooms.forEach((room, i) => {
         this.add
-          .text(20, 130 + i * 70, `${room.name}`, {
+          .text(cornerOffset.x, 130 + i * 70, `${room.name}`, {
             fontSize: 32,
             color: 'yellow',
           })
@@ -66,7 +66,7 @@ export default class SelectRoom extends Phaser.Scene {
 
         this.add
           .text(
-            20,
+            cornerOffset.x,
             160 + i * 70,
             `${room.levels.length} level${room.levels.length > 1 ? 's' : ''}, ${
               room.players.length
